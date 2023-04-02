@@ -18,7 +18,7 @@ void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
 		{
 			bUseSeamlessTravel = true;
 			// Set the map as a listen server for clients to connect to
-			World->ServerTravel(FString("/Game/Maps/BlastWarsMap?listen"));
+			World->ServerTravel(FString("/Game/Maps/MainMap?listen"));
 		}
 			
 	}
