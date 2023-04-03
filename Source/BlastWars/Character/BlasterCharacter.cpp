@@ -122,7 +122,24 @@ void ABlasterCharacter::LookUp(float Value)
 
 void ABlasterCharacter::EquipPressed()
 {
-	if (Combat && HasAuthority())
+	if (Combat)
+	{
+		//Equip weapon if you are the server
+		if (HasAuthority())
+		{
+			Combat->EquipWeapon(OverlappingWeapon);
+		}
+		//Equip weapon if you are a client by sending a RPC (Remote Procedural Call) that executes this code to another machine
+		else
+		{
+			ServerEquipPressed();
+		}
+	}
+}
+
+void ABlasterCharacter::ServerEquipPressed_Implementation()
+{
+	if (Combat)
 	{
 		Combat->EquipWeapon(OverlappingWeapon);
 	}
@@ -143,6 +160,7 @@ void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 	}
 }
 
+
 void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 {
 	if (OverlappingWeapon)
@@ -158,6 +176,11 @@ void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 			OverlappingWeapon->ShowPickupWidget(true);
 		}
 	}
+}
+
+bool ABlasterCharacter::IsWeaponEquipped()
+{
+	return (Combat && Combat->EquippedWeapon);
 }
 
 
