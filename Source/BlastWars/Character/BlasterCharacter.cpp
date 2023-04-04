@@ -10,6 +10,7 @@
 #include "BlastWars/Weapon/Weapon.h"
 #include "BlastWars/BlasterComponents/CombatComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -60,6 +61,7 @@ void ABlasterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	AimOffset(DeltaTime);
 
 }
 
@@ -148,6 +150,14 @@ void ABlasterCharacter::EquipPressed()
 	}
 }
 
+void ABlasterCharacter::ServerEquipPressed_Implementation()
+{
+	if (Combat)
+	{
+		Combat->EquipWeapon(OverlappingWeapon);
+	}
+}
+
 void ABlasterCharacter::CrouchPressed()
 {
 	if (bIsCrouched)
@@ -176,13 +186,45 @@ void ABlasterCharacter::AimReleased()
 	}
 }
 
-void ABlasterCharacter::ServerEquipPressed_Implementation()
+void ABlasterCharacter::AimOffset(float DeltaTime)
 {
-	if (Combat)
+	// Checks if the character has a weapon equipped, if not exit out
+	if (!IsWeaponEquipped()) return;
+
+	FVector Velocity = GetVelocity();
+	Velocity.Z = 0.f;
+	float Speed = Velocity.Size();
+	bool bIsFalling = GetCharacterMovement()->IsFalling();
+
+	// Checks if the character is standing still and not jumping
+	if (Speed == 0.f && !bIsFalling)
 	{
-		Combat->EquipWeapon(OverlappingWeapon);
+		FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
+		AO_Yaw = DeltaAimRotation.Yaw;
+		bUseControllerRotationYaw = false;
 	}
+	// Checks if the character is running or jumping
+	if (Speed > 0.f || bIsFalling)
+	{
+		StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		AO_Yaw = 0.f;
+		bUseControllerRotationYaw = true;
+	}
+
+	AO_Pitch = GetBaseAimRotation().Pitch;
+
+	// Corrects the compression on the pitch done by the engine to send accross the network
+	if (AO_Pitch > 90.f && !IsLocallyControlled())
+	{
+		// map pitch from [270, 360) to [-90, 0)
+		FVector2D InRange(260.f, 360.f);
+		FVector2D OutRange(-90.f, 0.f);
+		AO_Pitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AO_Pitch);
+	}
+
 }
+
 
 /*OnRep can have parameter input of only the type being replicated. What's passed in is the last value before replication. */
 void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
@@ -225,6 +267,12 @@ bool ABlasterCharacter::IsWeaponEquipped()
 bool ABlasterCharacter::IsAiming()
 {
 	return (Combat && Combat->bAiming);
+}
+
+AWeapon* ABlasterCharacter::GetEquippedWeapon()
+{
+	if (!Combat) return nullptr;
+	return Combat->EquippedWeapon;
 }
 
 
