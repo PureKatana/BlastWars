@@ -9,6 +9,7 @@
 #include "Net/UnrealNetwork.h"
 #include "BlastWars/Weapon/Weapon.h"
 #include "BlastWars/BlasterComponents/CombatComponent.h"
+#include "Components/CapsuleComponent.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -41,6 +42,10 @@ ABlasterCharacter::ABlasterCharacter()
 
 	// Set the crouching bool to true from the character movement
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
+
+	// Set the capsule and mesh to not collide with the camera
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 }
 
 // Called when the game starts or when spawned
