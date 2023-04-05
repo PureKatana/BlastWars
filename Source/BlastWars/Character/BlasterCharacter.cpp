@@ -47,6 +47,17 @@ ABlasterCharacter::ABlasterCharacter()
 	// Set the capsule and mesh to not collide with the camera
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+
+	// Set rotation rate
+	GetCharacterMovement()->RotationRate = FRotator(0.f, 0.f, 850.f);
+
+	// Set the default enum of TurningInPlace
+	TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+
+	// Set NetUpdateFrequency to standard multiplayer shooter games
+	NetUpdateFrequency = 66.f;
+	MinNetUpdateFrequency = 33.f;
+
 }
 
 // Called when the game starts or when spawned
@@ -71,7 +82,7 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	//Bind Actions
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ABlasterCharacter::Jump);
 	PlayerInputComponent->BindAction("Equip", IE_Pressed, this, &ABlasterCharacter::EquipPressed);
 	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ABlasterCharacter::CrouchPressed);
 	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &ABlasterCharacter::AimPressed);
@@ -160,13 +171,16 @@ void ABlasterCharacter::ServerEquipPressed_Implementation()
 
 void ABlasterCharacter::CrouchPressed()
 {
-	if (bIsCrouched)
+	if (!GetCharacterMovement()->IsFalling())
 	{
-		UnCrouch();
-	}
-	else
-	{
-		Crouch();
+		if (bIsCrouched)
+		{
+			UnCrouch();
+		}
+		else
+		{
+			Crouch();
+		}
 	}
 }
 
@@ -202,7 +216,12 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 		FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
 		FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
 		AO_Yaw = DeltaAimRotation.Yaw;
-		bUseControllerRotationYaw = false;
+		if (TurningInPlace == ETurningInPlace::ETIP_NotTurning)
+		{
+			InterpAO_Yaw = AO_Yaw;
+		}
+		bUseControllerRotationYaw = true;
+		TurnInPlace(DeltaTime);
 	}
 	// Checks if the character is running or jumping
 	if (Speed > 0.f || bIsFalling)
@@ -210,6 +229,7 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 		StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
 		AO_Yaw = 0.f;
 		bUseControllerRotationYaw = true;
+		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 	}
 
 	AO_Pitch = GetBaseAimRotation().Pitch;
@@ -223,6 +243,38 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 		AO_Pitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AO_Pitch);
 	}
 
+}
+
+void ABlasterCharacter::Jump()
+{
+	if (bIsCrouched)
+	{
+		UnCrouch();
+	}
+	Super::Jump();
+}
+
+void ABlasterCharacter::TurnInPlace(float DeltaTime)
+{
+	if (AO_Yaw > 90.f)
+	{
+		TurningInPlace = ETurningInPlace::ETIP_Right;
+	}
+	else if (AO_Yaw < -90.f)
+	{
+		TurningInPlace = ETurningInPlace::ETIP_Left;
+	}
+
+	if (TurningInPlace != ETurningInPlace::ETIP_NotTurning)
+	{
+		InterpAO_Yaw = FMath::FInterpTo(InterpAO_Yaw, 0.f, DeltaTime, 6.f);
+		AO_Yaw = InterpAO_Yaw;
+		if (FMath::Abs(AO_Yaw) < 15.f)
+		{
+			TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+			StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		}
+	}
 }
 
 
@@ -240,6 +292,7 @@ void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 		LastWeapon->ShowPickupWidget(false);
 	}
 }
+
 
 
 void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon)
