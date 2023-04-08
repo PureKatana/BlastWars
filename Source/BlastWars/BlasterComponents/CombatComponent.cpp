@@ -65,9 +65,28 @@ void UCombatComponent::OnRep_EquippedWeapon()
 void UCombatComponent::FirePressed(bool bPressed)
 {
 	bFirePressed = bPressed;
-	if (Character && bFirePressed)
+
+	if (bFirePressed)
+	{
+		// Fires locally on the server or called from a client to the server
+		ServerFire();
+	}
+}
+
+void UCombatComponent::ServerFire_Implementation()
+{
+	// Fires on all clients and server since the server will call this
+	MulticastFire();
+}
+
+void UCombatComponent::MulticastFire_Implementation()
+{
+	if (!EquippedWeapon) return;
+
+	if (Character)
 	{
 		Character->PlayFireMontage(bAiming);
+		EquippedWeapon->Fire();
 	}
 }
 
