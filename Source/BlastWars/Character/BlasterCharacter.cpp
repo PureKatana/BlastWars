@@ -11,6 +11,7 @@
 #include "BlastWars/BlasterComponents/CombatComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "BlasterAnimInstance.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -87,6 +88,8 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ABlasterCharacter::CrouchPressed);
 	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &ABlasterCharacter::AimPressed);
 	PlayerInputComponent->BindAction("Aim", IE_Released, this, &ABlasterCharacter::AimReleased);
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ABlasterCharacter::FirePressed);
+	PlayerInputComponent->BindAction("Fire", IE_Released, this, &ABlasterCharacter::FireReleased);
 
 	//Bind Axis
 	PlayerInputComponent->BindAxis("MoveForward", this, &ABlasterCharacter::MoveForward);
@@ -111,6 +114,21 @@ void ABlasterCharacter::PostInitializeComponents()
 	if (Combat)
 	{
 		Combat->Character = this;
+	}
+}
+
+void ABlasterCharacter::PlayFireMontage(bool bAiming)
+{
+	if (!Combat || !Combat->EquippedWeapon) return;
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	if (AnimInstance && FireWeaponMontage)
+	{
+		AnimInstance->Montage_Play(FireWeaponMontage);
+		FName SectionName;
+		SectionName = bAiming ? FName("RifleAim") : FName("RifleHip");
+		AnimInstance->Montage_JumpToSection(SectionName);
 	}
 }
 
@@ -252,6 +270,22 @@ void ABlasterCharacter::Jump()
 		UnCrouch();
 	}
 	Super::Jump();
+}
+
+void ABlasterCharacter::FirePressed()
+{
+	if (Combat)
+	{
+		Combat->FirePressed(true);
+	}
+}
+
+void ABlasterCharacter::FireReleased()
+{
+	if (Combat)
+	{
+		Combat->FirePressed(false);
+	}
 }
 
 void ABlasterCharacter::TurnInPlace(float DeltaTime)
