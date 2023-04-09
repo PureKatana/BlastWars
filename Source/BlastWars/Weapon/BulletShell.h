@@ -4,19 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Projectile.generated.h"
+#include "BulletShell.generated.h"
 
 UCLASS()
-class BLASTWARS_API AProjectile : public AActor
+class BLASTWARS_API ABulletShell : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	AProjectile();
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-	virtual void Destroyed() override;
+	ABulletShell();
+
 
 protected:
 	// Called when the game starts or when spawned
@@ -24,25 +22,17 @@ protected:
 
 	UFUNCTION()
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
 private:
-	UPROPERTY(EditAnywhere)
-	class UBoxComponent* CollisionBox;
 
 	UPROPERTY(VisibleAnywhere)
-	class UProjectileMovementComponent* ProjectileMovementComponent;
+	class UStaticMeshComponent* BulletShellMesh;
 
 	UPROPERTY(EditAnywhere)
-	class UParticleSystem* Tracer;
-
-	class UParticleSystemComponent* TracerComponent;
+	float ShellEjectionImpulse;
 
 	UPROPERTY(EditAnywhere)
-	UParticleSystem* ImpactParticles;
+	class USoundCue* ShellSound;
 
-	UPROPERTY(EditAnywhere)
-	class USoundCue* ImpactSound;
-
-public:	
-	
-
+	bool bPlaySoundOnce;
 };
