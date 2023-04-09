@@ -136,8 +136,9 @@ void AWeapon::Fire(const FVector& HitTarget)
 			if (World)
 			{
 				float Roll = FMath::RandRange(-45.f, 45.f);
+				float Pitch = FMath::RandRange(-45.f, 45.f);
 				float Yaw = FMath::RandRange(-45.f, 45.f);
-				FRotator RandomOffset(Roll, 0.f, Yaw);
+				FRotator RandomOffset(Roll, Pitch, Yaw);
 				World->SpawnActor<ABulletShell>(BulletShellClass, SocketTransform.GetLocation(), SocketTransform.GetRotation().Rotator() + RandomOffset);
 			}
 		}
