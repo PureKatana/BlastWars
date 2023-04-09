@@ -48,6 +48,7 @@ ABlasterCharacter::ABlasterCharacter()
 	// Set the capsule and mesh to not collide with the camera
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 
 	// Set rotation rate
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 0.f, 850.f);

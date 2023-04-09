@@ -5,11 +5,12 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "BlastWars/Types/TurningInPlace.h"
+#include "BlastWars/Interfaces/InteractWithCrosshairsInterface.h"
 #include "BlasterCharacter.generated.h"
 
 
 UCLASS()
-class BLASTWARS_API ABlasterCharacter : public ACharacter
+class BLASTWARS_API ABlasterCharacter : public ACharacter, public IInteractWithCrosshairsInterface
 {
 	GENERATED_BODY()
 
