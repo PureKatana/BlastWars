@@ -13,4 +13,3 @@ Blast Wars is a multiplayer third person shooting game. Use different weapons an
 
 - <b>Unreal Engine 5</b>
 
-<h2>Features and mechanics that I worked on : </h2>
