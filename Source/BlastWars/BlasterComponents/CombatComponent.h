@@ -61,6 +61,8 @@ private:
 
 	bool bFirePressed;
 
+	FVector HitTarget;
+
 public:	
 	
 
