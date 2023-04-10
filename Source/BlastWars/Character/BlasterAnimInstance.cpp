@@ -24,9 +24,7 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 		return;
 	}
 
-	FVector Velocity = BlasterCharacter->GetVelocity();
-	Velocity.Z = 0.f;
-	GroundSpeed = Velocity.Size();
+	GroundSpeed = BlasterCharacter->CalculateSpeed();
 
 	bIsFalling = BlasterCharacter->GetCharacterMovement()->IsFalling();
 	bIsAccelerating = BlasterCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f ? true : false;
@@ -35,6 +33,7 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	bIsCrouched = BlasterCharacter->bIsCrouched;
 	bAiming = BlasterCharacter->IsAiming();
 	TurningInPlace = BlasterCharacter->GetTurningInPlace();
+	bRotateRootBone = BlasterCharacter->ShouldRotateRootBone();
 
 	// Offset Yaw for strafing
 	FRotator AimRotation = BlasterCharacter->GetBaseAimRotation();
