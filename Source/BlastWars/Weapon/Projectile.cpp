@@ -8,6 +8,9 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Particles/ParticleSystem.h"
 #include "Sound/SoundCue.h"
+#include "BlastWars/Character/BlasterCharacter.h"
+#include "BlastWars/BlastWars.h"
+
 
 // Sets default values
 AProjectile::AProjectile()
@@ -24,6 +27,7 @@ AProjectile::AProjectile()
 	CollisionBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	CollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 	CollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
+	CollisionBox->SetCollisionResponseToChannel(ECC_Mesh, ECollisionResponse::ECR_Block);
 
 	// Set the projectile movement
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
@@ -48,6 +52,12 @@ void AProjectile::BeginPlay()
 
 void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter> (OtherActor);
+
+	if (BlasterCharacter)
+	{
+		BlasterCharacter->MulticastHit();
+	}
 	// Destroying a replicated actor will happen on all clients so therefore, it will play the particles and sound of the impact to the server and all clients
 	// Replicated effects without using RPCs to maximize performance on network bandwidth
 	Destroy();
