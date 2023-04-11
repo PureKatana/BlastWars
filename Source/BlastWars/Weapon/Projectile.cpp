@@ -7,10 +7,12 @@
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Particles/ParticleSystem.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "Sound/SoundCue.h"
 #include "BlastWars/Character/BlasterCharacter.h"
 #include "BlastWars/BlastWars.h"
-
 
 // Sets default values
 AProjectile::AProjectile()
@@ -57,10 +59,12 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimi
 	if (BlasterCharacter)
 	{
 		BlasterCharacter->MulticastHit();
+		MulticastHit(true);
 	}
-	// Destroying a replicated actor will happen on all clients so therefore, it will play the particles and sound of the impact to the server and all clients
-	// Replicated effects without using RPCs to maximize performance on network bandwidth
-	Destroy();
+	else
+	{
+		MulticastHit(false);
+	}
 }
 
 // Called every frame
@@ -70,18 +74,39 @@ void AProjectile::Tick(float DeltaTime)
 
 }
 
-void AProjectile::Destroyed()
-{
-	Super::Destroyed();
 
-	if (ImpactParticles)
+void AProjectile::MulticastHit_Implementation(bool bHitCharacter)
+{
+	if (bHitCharacter)
 	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
+		if (HitParticles)
+		{
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), HitParticles, GetActorLocation());
+		}
+
+		if (HitSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, HitSound, GetActorLocation());
+		}
+	}
+	else
+	{
+		if (ImpactParticles)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
+		}
+
+		if (ImpactSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
+		}
+
 	}
 
-	if (ImpactSound)
+	if (HasAuthority())
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
+		SetLifeSpan(0.05);
 	}
 }
+
 

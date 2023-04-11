@@ -16,7 +16,10 @@ public:
 	AProjectile();
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	virtual void Destroyed() override;
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastHit(bool bHitCharacter);
+
 
 protected:
 	// Called when the game starts or when spawned
@@ -41,6 +44,13 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	class USoundCue* ImpactSound;
+
+	UPROPERTY(EditAnywhere)
+	class UNiagaraSystem* HitParticles;
+
+	UPROPERTY(EditAnywhere)
+	USoundCue* HitSound;
+
 
 public:	
 	
