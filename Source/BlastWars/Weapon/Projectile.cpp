@@ -7,12 +7,12 @@
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Particles/ParticleSystem.h"
-#include "NiagaraFunctionLibrary.h"
-#include "NiagaraComponent.h"
-#include "Net/UnrealNetwork.h"
 #include "Sound/SoundCue.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
 #include "BlastWars/Character/BlasterCharacter.h"
 #include "BlastWars/BlastWars.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 AProjectile::AProjectile()
@@ -52,32 +52,16 @@ void AProjectile::BeginPlay()
 	}
 }
 
+
 void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter> (OtherActor);
-
-	if (BlasterCharacter)
-	{
-		BlasterCharacter->MulticastHit();
-		MulticastHit(true);
-	}
-	else
-	{
-		MulticastHit(false);
-	}
+	MulticastOnHit(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
+	Destroy();
 }
 
-// Called every frame
-void AProjectile::Tick(float DeltaTime)
+void AProjectile::MulticastOnHit_Implementation(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	Super::Tick(DeltaTime);
-
-}
-
-
-void AProjectile::MulticastHit_Implementation(bool bHitCharacter)
-{
-	if (bHitCharacter)
+	if (Cast<ABlasterCharacter>(OtherActor))
 	{
 		if (HitParticles)
 		{
@@ -86,7 +70,7 @@ void AProjectile::MulticastHit_Implementation(bool bHitCharacter)
 
 		if (HitSound)
 		{
-			UGameplayStatics::PlaySoundAtLocation(this, HitSound, GetActorLocation());
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, GetActorLocation());
 		}
 	}
 	else
@@ -100,13 +84,14 @@ void AProjectile::MulticastHit_Implementation(bool bHitCharacter)
 		{
 			UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
 		}
-
 	}
+}
 
-	if (HasAuthority())
-	{
-		SetLifeSpan(0.001f);
-	}
+// Called every frame
+void AProjectile::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
 }
 
 
