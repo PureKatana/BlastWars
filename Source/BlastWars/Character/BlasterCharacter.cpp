@@ -14,12 +14,17 @@
 #include "BlasterAnimInstance.h"
 #include "BlastWars/BlastWars.h"
 #include "BlastWars/PlayerController/BlasterPlayerController.h"
+#include "BlastWars/GameMode/BlastWarsGameMode.h"
+#include "TimerManager.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	// Set Spawn Collision
+	SpawnCollisionHandlingMethod = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
 	// Set the SpringArm
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
@@ -177,6 +182,27 @@ float ABlasterCharacter::CalculateSpeed()
 	return Velocity.Size();
 }
 
+void ABlasterCharacter::Eliminated()
+{
+	MulticastEliminated();
+	GetWorldTimerManager().SetTimer(EliminatedTimer, this, &ABlasterCharacter::EliminatedTimerFinished, EliminatedDelay);
+}
+
+void ABlasterCharacter::MulticastEliminated_Implementation()
+{
+	bEliminated = true;
+	PlayDeathMontage();
+}
+
+void ABlasterCharacter::EliminatedTimerFinished()
+{
+	ABlastWarsGameMode* BlastWarsGameMode = GetWorld()->GetAuthGameMode<ABlastWarsGameMode>();
+	if (BlastWarsGameMode)
+	{
+		BlastWarsGameMode->RequestRespawn(this, Controller);
+	}
+}
+
 void ABlasterCharacter::PlayFireMontage(bool bAiming)
 {
 	if (!Combat || !Combat->EquippedWeapon) return;
@@ -189,6 +215,17 @@ void ABlasterCharacter::PlayFireMontage(bool bAiming)
 		FName SectionName;
 		SectionName = bAiming ? FName("RifleAim") : FName("RifleHip");
 		AnimInstance->Montage_JumpToSection(SectionName);
+	}
+}
+
+void ABlasterCharacter::PlayDeathMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	int32 Selection = FMath::RandRange(0, DeathMontages.Num() - 1);
+	if (AnimInstance && DeathMontages[Selection])
+	{
+		AnimInstance->Montage_Play(DeathMontages[Selection]);
 	}
 }
 
@@ -211,6 +248,18 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const 
 	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
 	UpdateHUDHealth();
 	PlayHitReactMontage();
+
+	if (Health == 0.f)
+	{
+		ABlastWarsGameMode* BlastWarsGameMode = GetWorld()->GetAuthGameMode<ABlastWarsGameMode>();
+
+		if (BlastWarsGameMode)
+		{
+			BlasterPlayerController = !BlasterPlayerController ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
+			ABlasterPlayerController* AttackerController = Cast<ABlasterPlayerController>(InstigatorController);
+			BlastWarsGameMode->PlayerEliminated(this, BlasterPlayerController, AttackerController);
+		}
+	}
 }
 
 
