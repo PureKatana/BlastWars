@@ -13,6 +13,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "BlasterAnimInstance.h"
 #include "BlastWars/BlastWars.h"
+#include "BlastWars/PlayerController/BlasterPlayerController.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -64,18 +65,16 @@ ABlasterCharacter::ABlasterCharacter()
 
 }
 
-void ABlasterCharacter::OnRep_ReplicatedMovement()
-{
-	Super::OnRep_ReplicateMovement();
-	SimulatedProxiesTurn();
-	TimeSinceLastMovementReplication = 0.f;
-}
-
 // Called when the game starts or when spawned
 void ABlasterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	BlasterPlayerController = Cast<ABlasterPlayerController>(Controller);
+	if (BlasterPlayerController)
+	{
+		BlasterPlayerController->SetHUDHealth(Health, MaxHealth);
+	}
 }
 
 // Called every frame
@@ -132,6 +131,20 @@ void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 
 	//Only replicates to the owner of this pawn
 	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon, COND_OwnerOnly);
+
+	DOREPLIFETIME(ABlasterCharacter, Health);
+}
+
+void ABlasterCharacter::OnRep_ReplicatedMovement()
+{
+	Super::OnRep_ReplicateMovement();
+	SimulatedProxiesTurn();
+	TimeSinceLastMovementReplication = 0.f;
+}
+
+void ABlasterCharacter::OnRep_Health()
+{
+
 }
 
 void ABlasterCharacter::PostInitializeComponents()

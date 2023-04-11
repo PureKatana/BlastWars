@@ -105,7 +105,7 @@ void AProjectile::MulticastHit_Implementation(bool bHitCharacter)
 
 	if (HasAuthority())
 	{
-		SetLifeSpan(0.05);
+		SetLifeSpan(0.001f);
 	}
 }
 
