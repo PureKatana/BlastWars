@@ -144,6 +144,14 @@ void ABlasterCharacter::PostInitializeComponents()
 	}
 }
 
+float ABlasterCharacter::CalculateSpeed()
+{
+	FVector Velocity = GetVelocity();
+	Velocity.Z = 0.f;
+
+	return Velocity.Size();
+}
+
 void ABlasterCharacter::PlayFireMontage(bool bAiming)
 {
 	if (!Combat || !Combat->EquippedWeapon) return;
@@ -259,14 +267,6 @@ void ABlasterCharacter::AimReleased()
 	}
 }
 
-float ABlasterCharacter::CalculateSpeed()
-{
-	FVector Velocity = GetVelocity();
-	Velocity.Z = 0.f;
-
-	return Velocity.Size();
-}
-
 void ABlasterCharacter::AimOffset(float DeltaTime)
 {
 	// Checks if the character has a weapon equipped, if not exit out
@@ -364,7 +364,7 @@ void ABlasterCharacter::Jump()
 
 void ABlasterCharacter::FirePressed()
 {
-	if (Combat)
+	if (IsWeaponEquipped())
 	{
 		Combat->FirePressed(true);
 	}
@@ -372,7 +372,7 @@ void ABlasterCharacter::FirePressed()
 
 void ABlasterCharacter::FireReleased()
 {
-	if (Combat)
+	if (IsWeaponEquipped())
 	{
 		Combat->FirePressed(false);
 	}
