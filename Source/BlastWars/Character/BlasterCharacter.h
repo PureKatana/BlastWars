@@ -148,6 +148,10 @@ private :
 	// Material Instance set on the blueprint, used with the dynamic material instance
 	UPROPERTY(EditAnywhere, Category = Elimination)
 	UMaterialInstance* DissolveMaterialInstance;
+	UPROPERTY(EditAnywhere)
+	class UNiagaraSystem* DeathParticles;
+	UPROPERTY(EditAnywhere)
+	class USoundCue* DeathSound;
 	
 
 public:	

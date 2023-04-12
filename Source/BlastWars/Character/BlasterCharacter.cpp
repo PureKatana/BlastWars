@@ -11,11 +11,15 @@
 #include "BlastWars/BlasterComponents/CombatComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/GameplayStatics.h"
 #include "BlasterAnimInstance.h"
 #include "BlastWars/BlastWars.h"
 #include "BlastWars/PlayerController/BlasterPlayerController.h"
 #include "BlastWars/GameMode/BlastWarsGameMode.h"
 #include "TimerManager.h"
+#include "Sound/SoundCue.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -221,6 +225,17 @@ void ABlasterCharacter::MulticastEliminated_Implementation()
 	//Disable Collision
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	// Death Effect
+	if (DeathParticles)
+	{
+		FName AttachPointName;
+		UNiagaraFunctionLibrary::SpawnSystemAttached(DeathParticles, GetMesh(), AttachPointName, GetActorLocation(), GetActorRotation(), EAttachLocation::SnapToTarget, true);
+	}
+	if (DeathSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, DeathSound, GetActorLocation());
+	}
 }
 
 void ABlasterCharacter::EliminatedTimerFinished()
