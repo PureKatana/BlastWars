@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "BlastWars/Types/TurningInPlace.h"
 #include "BlastWars/Interfaces/InteractWithCrosshairsInterface.h"
+#include "Components/TimelineComponent.h"
 #include "BlasterCharacter.generated.h"
 
 
@@ -130,6 +131,23 @@ private :
 	UPROPERTY(EditDefaultsOnly)
 	float EliminatedDelay = 3.f;
 	void EliminatedTimerFinished();
+
+	// Dissolve effect
+
+	UPROPERTY(VisibleAnywhere)
+	UTimelineComponent* DissolveTimeline;
+	FOnTimelineFloat DissolveTrack;
+	UFUNCTION()
+	void UpdateDissolveMaterial(float DissolveValue);
+	void StartDissolve();
+	UPROPERTY(EditAnywhere, Category = Elimination)
+	UCurveFloat* DissolveCurve;
+	UPROPERTY(VisibleAnywhere, Category = Elimination)
+	// Dynamic Instance that we can change at runtime
+	UMaterialInstanceDynamic* DynamicDissolveMaterialInstance;
+	// Material Instance set on the blueprint, used with the dynamic material instance
+	UPROPERTY(EditAnywhere, Category = Elimination)
+	UMaterialInstance* DissolveMaterialInstance;
 	
 
 public:	
