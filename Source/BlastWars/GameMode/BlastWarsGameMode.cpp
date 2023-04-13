@@ -25,7 +25,7 @@ void ABlastWarsGameMode::PlayerEliminated(ABlasterCharacter* EliminatedCharacter
 
 	if (EliminatedCharacter)
 	{
-		EliminatedCharacter->Eliminated();
+		EliminatedCharacter->Eliminated(AttackerController);
 	}
 }
 

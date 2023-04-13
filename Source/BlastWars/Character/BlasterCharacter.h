@@ -34,15 +34,16 @@ public:
 	virtual void OnRep_ReplicatedMovement() override;
 	float CalculateSpeed();
 
-	void Eliminated();
+	void Eliminated(class ABlasterPlayerController* AttackerController);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastEliminated();
+	void MulticastEliminated(const FString& AttackerName);
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	void UpdateEliminatedText();
 	void UpdateHUDHealth();
 
 	void MoveForward(float Value);
@@ -127,7 +128,7 @@ private :
 	UFUNCTION()
 	void OnRep_Health();
 	UPROPERTY()
-	class ABlasterPlayerController* BlasterPlayerController;
+	ABlasterPlayerController* BlasterPlayerController;
 
 	bool bEliminated = false;
 
@@ -174,4 +175,5 @@ public:
 	FORCEINLINE bool IsEliminated() const { return bEliminated; }
 	FORCEINLINE float GetHealth() const { return Health; }
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
+	FORCEINLINE float GetEliminatedDelay() const { return EliminatedDelay; }
 };

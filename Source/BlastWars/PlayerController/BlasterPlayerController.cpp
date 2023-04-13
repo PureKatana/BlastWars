@@ -7,6 +7,7 @@
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "BlastWars/Character/BlasterCharacter.h"
+#include "TimerManager.h"
 
 
 void ABlasterPlayerController::BeginPlay()
@@ -59,5 +60,39 @@ void ABlasterPlayerController::SetHUDDeaths(float Deaths)
 	{
 		FString DeathsAmountText = FString::Printf(TEXT("%d"), FMath::FloorToInt(Deaths));
 		BlasterHUD->CharacterOverlay->DeathsAmount->SetText(FText::FromString(DeathsAmountText));
+	}
+}
+
+void ABlasterPlayerController::SetHUDEliminationText(FString InText)
+{
+	BlasterHUD = !BlasterHUD ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+
+	if (BlasterHUD && BlasterHUD->CharacterOverlay && BlasterHUD->CharacterOverlay->EliminationText)
+	{
+		if (InText.IsEmpty())
+		{
+			FString TextToDisplay = FString::Printf(TEXT("You eliminated yourself"));
+			BlasterHUD->CharacterOverlay->EliminationText->SetText(FText::FromString(TextToDisplay));
+		}
+		else
+		{
+			FString TextToDisplay = FString::Printf(TEXT("%s \r eliminated you"), *InText);
+			BlasterHUD->CharacterOverlay->EliminationText->SetText(FText::FromString(TextToDisplay));
+		}
+		BlasterHUD->CharacterOverlay->EliminationText->SetVisibility(ESlateVisibility::Visible);
+		ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(GetPawn());
+		GetWorldTimerManager().SetTimer(HideTimer, this, &ABlasterPlayerController::HideEliminatedText, BlasterCharacter->GetEliminatedDelay());
+
+	}
+}
+
+void ABlasterPlayerController::HideEliminatedText()
+{
+	BlasterHUD = !BlasterHUD ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+
+	if (BlasterHUD && BlasterHUD->CharacterOverlay && BlasterHUD->CharacterOverlay->EliminationText)
+	{
+		BlasterHUD->CharacterOverlay->EliminationText->SetText(FText());
+		BlasterHUD->CharacterOverlay->EliminationText->SetVisibility(ESlateVisibility::Hidden);
 	}
 }

@@ -84,6 +84,7 @@ void ABlasterCharacter::BeginPlay()
 	Super::BeginPlay();
 	
 	UpdateHUDHealth();
+	UpdateEliminatedText();
 
 	if (HasAuthority())
 	{
@@ -187,6 +188,15 @@ void ABlasterCharacter::UpdateHUDHealth()
 	}
 }
 
+void ABlasterCharacter::UpdateEliminatedText()
+{
+	BlasterPlayerController = !BlasterPlayerController ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
+	if (BlasterPlayerController)
+	{
+		BlasterPlayerController->HideEliminatedText();
+	}
+}
+
 void ABlasterCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
@@ -205,17 +215,27 @@ float ABlasterCharacter::CalculateSpeed()
 	return Velocity.Size();
 }
 
-void ABlasterCharacter::Eliminated()
+void ABlasterCharacter::Eliminated(ABlasterPlayerController* AttackController)
 {
 	if (IsWeaponEquipped())
 	{
 		Combat->EquippedWeapon->Dropped();
 	}
-	MulticastEliminated();
+	FString AttackerName;
+	ABlasterPlayerController* AttackerBlasterController = AttackController;
+	if (AttackerBlasterController)
+	{
+		ABlasterPlayerState* AttackerPlayerState = Cast<ABlasterPlayerState>(AttackerBlasterController->PlayerState);
+		if (AttackerPlayerState)
+		{
+			AttackerName = AttackerPlayerState->GetPlayerName();
+		}
+	}
+	MulticastEliminated(AttackerName);
 	GetWorldTimerManager().SetTimer(EliminatedTimer, this, &ABlasterCharacter::EliminatedTimerFinished, EliminatedDelay);
 }
 
-void ABlasterCharacter::MulticastEliminated_Implementation()
+void ABlasterCharacter::MulticastEliminated_Implementation(const FString& AttackerName)
 {
 	bEliminated = true;
 	PlayDeathMontage();
@@ -236,6 +256,7 @@ void ABlasterCharacter::MulticastEliminated_Implementation()
 	if (BlasterPlayerController)
 	{
 		DisableInput(BlasterPlayerController);
+		BlasterPlayerController->SetHUDEliminationText(AttackerName);
 	}
 
 	//Disable Collision

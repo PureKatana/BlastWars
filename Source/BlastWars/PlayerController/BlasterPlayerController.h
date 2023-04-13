@@ -19,6 +19,8 @@ public:
 	void SetHUDHealth(float Health, float MaxHealth);
 	void SetHUDScore(float Score);
 	void SetHUDDeaths(float Deaths);
+	void SetHUDEliminationText(FString InText);
+	void HideEliminatedText();
 	virtual void OnPossess(APawn* InPawn) override;
 
 protected:
@@ -29,4 +31,6 @@ private:
 
 	UPROPERTY()
 	class ABlasterHUD* BlasterHUD;
+
+	FTimerHandle HideTimer;
 };
