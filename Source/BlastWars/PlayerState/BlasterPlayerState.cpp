@@ -4,11 +4,19 @@
 #include "BlasterPlayerState.h"
 #include "BlastWars/Character/BlasterCharacter.h"
 #include "BlastWars/PlayerController/BlasterPlayerController.h"
+#include "Net/UnrealNetwork.h"
+
+void ABlasterPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ABlasterPlayerState, Deaths);
+}
 
 void ABlasterPlayerState::AddToScore(float ScoreAmount)
 {
 	// In server
-	Score += ScoreAmount;
+	SetScore(GetScore() + ScoreAmount);
 	Character = !Character ? Cast<ABlasterCharacter>(GetPawn()) : Character;
 
 	if (Character)
@@ -16,7 +24,7 @@ void ABlasterPlayerState::AddToScore(float ScoreAmount)
 		Controller = !Controller ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
 		if (Controller)
 		{
-			Controller->SetHUDScore(Score);
+			Controller->SetHUDScore(GetScore());
 		}
 	}
 }
@@ -32,7 +40,36 @@ void ABlasterPlayerState::OnRep_Score()
 		Controller = !Controller ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
 		if (Controller)
 		{
-			Controller->SetHUDScore(Score);
+			Controller->SetHUDScore(GetScore());
+		}
+	}
+}
+
+void ABlasterPlayerState::AddToDeaths(float DeathsAmount)
+{
+	Deaths += DeathsAmount;
+	Character = !Character ? Cast<ABlasterCharacter>(GetPawn()) : Character;
+
+	if (Character)
+	{
+		Controller = !Controller ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
+		if (Controller)
+		{
+			Controller->SetHUDDeaths(Deaths);
+		}
+	}
+}
+
+void ABlasterPlayerState::OnRep_Deaths()
+{
+	Character = !Character ? Cast<ABlasterCharacter>(GetPawn()) : Character;
+
+	if (Character)
+	{
+		Controller = !Controller ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
+		if (Controller)
+		{
+			Controller->SetHUDDeaths(Deaths);
 		}
 	}
 }

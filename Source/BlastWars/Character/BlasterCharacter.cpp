@@ -128,6 +128,7 @@ void ABlasterCharacter::PollInitialize()
 		if (BlasterPlayerState)
 		{
 			BlasterPlayerState->AddToScore(0.f);
+			BlasterPlayerState->AddToDeaths(0.f);
 		}
 	}
 }

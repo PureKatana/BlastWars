@@ -126,6 +126,7 @@ private :
 	float Health = 100.f;
 	UFUNCTION()
 	void OnRep_Health();
+	UPROPERTY()
 	class ABlasterPlayerController* BlasterPlayerController;
 
 	bool bEliminated = false;
@@ -155,7 +156,8 @@ private :
 	class UNiagaraSystem* DeathParticles;
 	UPROPERTY(EditAnywhere)
 	class USoundCue* DeathSound;
-	
+
+	UPROPERTY()
 	class ABlasterPlayerState* BlasterPlayerState;
 
 public:	
