@@ -30,4 +30,10 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* EliminationText;
 
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* WeaponAmmoAmount;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* CarriedAmmoAmount;
+
 };

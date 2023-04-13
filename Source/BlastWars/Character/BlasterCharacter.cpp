@@ -38,7 +38,7 @@ ABlasterCharacter::ABlasterCharacter()
 	CameraBoom->bUsePawnControlRotation = true;
 
 	// Set the Camera
-	FollowCamera = CreateAbstractDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
+	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
 
@@ -91,7 +91,6 @@ void ABlasterCharacter::BeginPlay()
 		OnTakeAnyDamage.AddDynamic(this, &ABlasterCharacter::ReceiveDamage);
 	}
 }
-
 
 // Called every frame
 void ABlasterCharacter::Tick(float DeltaTime)
@@ -188,15 +187,6 @@ void ABlasterCharacter::UpdateHUDHealth()
 	}
 }
 
-void ABlasterCharacter::UpdateEliminatedText()
-{
-	BlasterPlayerController = !BlasterPlayerController ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
-	if (BlasterPlayerController)
-	{
-		BlasterPlayerController->HideEliminatedText();
-	}
-}
-
 void ABlasterCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
@@ -213,6 +203,15 @@ float ABlasterCharacter::CalculateSpeed()
 	Velocity.Z = 0.f;
 
 	return Velocity.Size();
+}
+
+void ABlasterCharacter::UpdateEliminatedText()
+{
+	BlasterPlayerController = !BlasterPlayerController ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
+	if (BlasterPlayerController)
+	{
+		BlasterPlayerController->HideEliminatedText();
+	}
 }
 
 void ABlasterCharacter::Eliminated(ABlasterPlayerController* AttackController)
@@ -237,6 +236,10 @@ void ABlasterCharacter::Eliminated(ABlasterPlayerController* AttackController)
 
 void ABlasterCharacter::MulticastEliminated_Implementation(const FString& AttackerName)
 {
+	if (BlasterPlayerController)
+	{
+		BlasterPlayerController->SetHUDWeaponAmmo(0);
+	}
 	bEliminated = true;
 	PlayDeathMontage();
 
@@ -281,6 +284,11 @@ void ABlasterCharacter::EliminatedTimerFinished()
 	if (BlastWarsGameMode)
 	{
 		BlastWarsGameMode->RequestRespawn(this, Controller);
+		//BlasterPlayerController = !BlasterPlayerController ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
+		if (BlasterPlayerController)
+		{
+			BlasterPlayerController->HideEliminatedText();
+		}
 	}
 }
 
@@ -343,7 +351,6 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const 
 	}
 }
 
-
 void ABlasterCharacter::MoveForward(float Value)
 {
 	if (Controller != nullptr && Value != 0.f) 
@@ -367,6 +374,42 @@ void ABlasterCharacter::MoveRight(float Value)
 void ABlasterCharacter::Turn(float Value)
 {
 	AddControllerYawInput(Value);
+}
+
+void ABlasterCharacter::SimulatedProxiesTurn()
+{
+	if (!Combat || !Combat->EquippedWeapon) return;
+
+	bRotateRootBone = false;
+	float Speed = CalculateSpeed();
+	if (Speed > 0.f)
+	{
+		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+		return;
+	}
+
+	// Calculate the difference of the rotation from last frame
+	ProxyRotLastFrame = ProxyRot;
+	ProxyRot = GetActorRotation();
+	ProxyYaw = UKismetMathLibrary::NormalizedDeltaRotator(ProxyRot, ProxyRotLastFrame).Yaw;
+
+	if (FMath::Abs(ProxyYaw) > TurnThreshold)
+	{
+		if (ProxyYaw > TurnThreshold)
+		{
+			TurningInPlace = ETurningInPlace::ETIP_Right;
+		}
+		else if (ProxyYaw < TurnThreshold)
+		{
+			TurningInPlace = ETurningInPlace::ETIP_Left;
+		}
+		else
+		{
+			TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+		}
+		return;
+	}
+	TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 }
 
 void ABlasterCharacter::LookUp(float Value)
@@ -480,42 +523,6 @@ void ABlasterCharacter::CalculateAO_Pitch()
 	}
 }
 
-void ABlasterCharacter::SimulatedProxiesTurn()
-{
-	if (!Combat || !Combat->EquippedWeapon) return;
-
-	bRotateRootBone = false;
-	float Speed = CalculateSpeed();
-	if (Speed > 0.f)
-	{
-		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
-		return;
-	}
-
-	// Calculate the difference of the rotation from last frame
-	ProxyRotLastFrame = ProxyRot;
-	ProxyRot = GetActorRotation();
-	ProxyYaw = UKismetMathLibrary::NormalizedDeltaRotator(ProxyRot, ProxyRotLastFrame).Yaw;
-
-	if (FMath::Abs(ProxyYaw) > TurnThreshold)
-	{
-		if (ProxyYaw > TurnThreshold)
-		{
-			TurningInPlace = ETurningInPlace::ETIP_Right;
-		}
-		else if (ProxyYaw < TurnThreshold)
-		{
-			TurningInPlace = ETurningInPlace::ETIP_Left;
-		}
-		else
-		{
-			TurningInPlace = ETurningInPlace::ETIP_NotTurning;
-		}
-		return;
-	}
-	TurningInPlace = ETurningInPlace::ETIP_NotTurning;
-}
-
 void ABlasterCharacter::Jump()
 {
 	if (bIsCrouched)
@@ -564,7 +571,6 @@ void ABlasterCharacter::TurnInPlace(float DeltaTime)
 	}
 }
 
-
 /*OnRep can have parameter input of only the type being replicated. What's passed in is the last value before replication. */
 void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 {
@@ -580,6 +586,22 @@ void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 	}
 }
 
+void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon)
+{
+	if (OverlappingWeapon)
+	{
+		OverlappingWeapon->ShowPickupWidget(false);
+	}
+	OverlappingWeapon = Weapon;
+	// Check if the server host is controlling the character
+	if (IsLocallyControlled())
+	{
+		if (OverlappingWeapon)
+		{
+			OverlappingWeapon->ShowPickupWidget(true);
+		}
+	}
+}
 
 void ABlasterCharacter::HideCamera()
 {
@@ -603,7 +625,6 @@ void ABlasterCharacter::HideCamera()
 	}
 }
 
-
 void ABlasterCharacter::UpdateDissolveMaterial(float DissolveValue)
 {
 	if (DynamicDissolveMaterialInstance)
@@ -619,23 +640,6 @@ void ABlasterCharacter::StartDissolve()
 	{
 		DissolveTimeline->AddInterpFloat(DissolveCurve, DissolveTrack);
 		DissolveTimeline->Play();
-	}
-}
-
-void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon)
-{
-	if (OverlappingWeapon)
-	{
-		OverlappingWeapon->ShowPickupWidget(false);
-	}
-	OverlappingWeapon = Weapon;
-	// Check if the server host is controlling the character
-	if (IsLocallyControlled())
-	{
-		if (OverlappingWeapon)
-		{
-			OverlappingWeapon->ShowPickupWidget(true);
-		}
 	}
 }
 

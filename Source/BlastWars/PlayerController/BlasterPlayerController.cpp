@@ -7,7 +7,6 @@
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "BlastWars/Character/BlasterCharacter.h"
-#include "TimerManager.h"
 
 
 void ABlasterPlayerController::BeginPlay()
@@ -80,9 +79,28 @@ void ABlasterPlayerController::SetHUDEliminationText(FString InText)
 			BlasterHUD->CharacterOverlay->EliminationText->SetText(FText::FromString(TextToDisplay));
 		}
 		BlasterHUD->CharacterOverlay->EliminationText->SetVisibility(ESlateVisibility::Visible);
-		ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(GetPawn());
-		GetWorldTimerManager().SetTimer(HideTimer, this, &ABlasterPlayerController::HideEliminatedText, BlasterCharacter->GetEliminatedDelay());
+	}
+}
 
+void ABlasterPlayerController::SetHUDWeaponAmmo(int32 Ammo)
+{
+	BlasterHUD = !BlasterHUD ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+
+	if (BlasterHUD && BlasterHUD->CharacterOverlay && BlasterHUD->CharacterOverlay->WeaponAmmoAmount)
+	{
+		FString WeaponAmmoAmountText = FString::Printf(TEXT("%d"), Ammo);
+		BlasterHUD->CharacterOverlay->WeaponAmmoAmount->SetText(FText::FromString(WeaponAmmoAmountText));
+	}
+}
+
+void ABlasterPlayerController::SetHUDCarriedAmmo(int32 Ammo)
+{
+	BlasterHUD = !BlasterHUD ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+
+	if (BlasterHUD && BlasterHUD->CharacterOverlay && BlasterHUD->CharacterOverlay->CarriedAmmoAmount)
+	{
+		FString CarriedAmmoAmountText = FString::Printf(TEXT("%d"), Ammo);
+		BlasterHUD->CharacterOverlay->CarriedAmmoAmount->SetText(FText::FromString(CarriedAmmoAmountText));
 	}
 }
 

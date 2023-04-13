@@ -13,6 +13,7 @@
 #include "BlastWars/PlayerController/BlasterPlayerController.h"
 #include "Camera/CameraComponent.h"
 #include "TimerManager.h"
+#include "Sound/SoundCue.h"
 
 // Sets default values for this component's properties
 UCombatComponent::UCombatComponent()
@@ -32,8 +33,8 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 
 	DOREPLIFETIME(UCombatComponent, EquippedWeapon);
 	DOREPLIFETIME(UCombatComponent, bAiming);
+	DOREPLIFETIME_CONDITION(UCombatComponent, CarriedAmmo, COND_OwnerOnly);
 }
-
 
 // Called when the game starts
 void UCombatComponent::BeginPlay()
@@ -49,10 +50,12 @@ void UCombatComponent::BeginPlay()
 			DefaultFOV = Character->GetFollowCamera()->FieldOfView;
 			CurrentFOV = DefaultFOV;
 		}
+		if (Character->HasAuthority())
+		{
+			InitializeCarriedAmmo();
+		}
 	}
-
 }
-
 
 // Called every frame
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -69,6 +72,21 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 		SetHUDCrosshairs(DeltaTime);
 	}
 	
+}
+
+void UCombatComponent::OnRep_CarriedAmmo()
+{
+	Controller = !Controller ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
+	if (Controller)
+	{
+		Controller->SetHUDCarriedAmmo(CarriedAmmo);
+	}
+}
+
+void UCombatComponent::InitializeCarriedAmmo()
+{
+	// Emplace avoids adding any temporaries when inserting into the map (Temporaries are objects that are created and destroyed in the same expression)
+	CarriedAmmoMap.Emplace(EWeaponType::EWT_AssaultRifle, StartingARAmmo);
 }
 
 void UCombatComponent::StartFireTimer()
@@ -89,6 +107,12 @@ void UCombatComponent::FireTimerFinished()
 	}
 }
 
+bool UCombatComponent::CanFire()
+{
+	if (!EquippedWeapon) return false;
+	return !EquippedWeapon->IsEmpty() || !bCanFire;
+}
+
 void UCombatComponent::FirePressed(bool bPressed)
 {
 	bFirePressed = bPressed;
@@ -101,7 +125,7 @@ void UCombatComponent::FirePressed(bool bPressed)
 
 void UCombatComponent::Fire()
 {
-	if (bCanFire)
+	if (CanFire())
 	{
 		bCanFire = false;
 		// Fires locally on the server or called from a client to the server
@@ -112,6 +136,17 @@ void UCombatComponent::Fire()
 			CrosshairShootFactor = 0.8f;
 		}
 		StartFireTimer();
+	}
+	else
+	{
+		if (EquippedWeapon)
+		{
+			if (EquippedWeapon->GetEmptyShotSoundCue())
+			{
+				UGameplayStatics::PlaySoundAtLocation(GetWorld(), EquippedWeapon->GetEmptyShotSoundCue(), EquippedWeapon->GetActorLocation());
+				StartFireTimer();
+			}
+		}
 	}
 }
 
@@ -135,7 +170,10 @@ void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& T
 void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 {
 	if (!Character || !WeaponToEquip ) return;
-
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->Dropped();
+	}
 	EquippedWeapon = WeaponToEquip;
 	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
 	const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
@@ -145,7 +183,17 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	}
 	// Set Owner replicates for all clients already
 	EquippedWeapon->SetOwner(Character);
+	EquippedWeapon->SetHUDAmmo();
 
+	if (CarriedAmmoMap.Contains(EquippedWeapon->GetWeaponType()))
+	{
+		CarriedAmmo = CarriedAmmoMap[EquippedWeapon->GetWeaponType()];
+	}
+	Controller = !Controller ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
+	if (Controller)
+	{
+		Controller->SetHUDCarriedAmmo(CarriedAmmo);
+	}
 	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 	Character->bUseControllerRotationYaw = true;
 }
