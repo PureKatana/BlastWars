@@ -22,6 +22,7 @@ public:
 	void SetHUDEliminationText(FString InText);
 	void SetHUDWeaponAmmo(int32 Ammo);
 	void SetHUDCarriedAmmo(int32 Ammo);
+	void SetHUDWeaponType(FText WeaponType);
 	void HideEliminatedText();
 
 	virtual void OnPossess(APawn* InPawn) override;

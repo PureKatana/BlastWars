@@ -24,7 +24,9 @@ void ABlasterPlayerController::OnPossess(APawn* InPawn)
 	if (BlasterCharacter)
 	{
 		SetHUDHealth(BlasterCharacter->GetHealth(), BlasterCharacter->GetMaxHealth());
+		SetHUDWeaponType(FText::FromString(""));
 	}
+
 }
 
 void ABlasterPlayerController::SetHUDHealth(float Health, float MaxHealth)
@@ -101,6 +103,16 @@ void ABlasterPlayerController::SetHUDCarriedAmmo(int32 Ammo)
 	{
 		FString CarriedAmmoAmountText = FString::Printf(TEXT("%d"), Ammo);
 		BlasterHUD->CharacterOverlay->CarriedAmmoAmount->SetText(FText::FromString(CarriedAmmoAmountText));
+	}
+}
+
+void ABlasterPlayerController::SetHUDWeaponType(FText WeaponType)
+{
+	BlasterHUD = !BlasterHUD ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+
+	if (BlasterHUD && BlasterHUD->CharacterOverlay && BlasterHUD->CharacterOverlay->WeaponTypeText)
+	{
+		BlasterHUD->CharacterOverlay->WeaponTypeText->SetText(WeaponType);
 	}
 }
 

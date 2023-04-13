@@ -198,6 +198,7 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	if (Controller)
 	{
 		Controller->SetHUDCarriedAmmo(CarriedAmmo);
+		Controller->SetHUDWeaponType(GetDisplayNameWeaponType());
 	}
 	if (EquippedWeapon->EquipSound)
 	{
@@ -312,6 +313,11 @@ void UCombatComponent::OnRep_EquippedWeapon()
 		if (EquippedWeapon->EquipSound)
 		{
 			UGameplayStatics::PlaySoundAtLocation(this, EquippedWeapon->EquipSound, Character->GetActorLocation());
+		}
+
+		if (Controller)
+		{
+			Controller->SetHUDWeaponType(GetDisplayNameWeaponType());
 		}
 	}
 }
@@ -467,4 +473,12 @@ void UCombatComponent::TraceUnderCrosshair(FHitResult& TraceHitResult)
 			TraceHitResult.ImpactPoint = End;
 		}
 	}
+}
+
+FText UCombatComponent::GetDisplayNameWeaponType() const
+{
+	if (!EquippedWeapon) return FText::FromString("");
+
+	FText WeaponTypeText = StaticEnum<EWeaponType>()->GetDisplayNameTextByIndex(static_cast<int32>(EquippedWeapon->GetWeaponType()));
+	return WeaponTypeText;
 }

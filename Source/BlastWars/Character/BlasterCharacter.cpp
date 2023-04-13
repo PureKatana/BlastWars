@@ -189,6 +189,15 @@ void ABlasterCharacter::UpdateHUDHealth()
 	}
 }
 
+void ABlasterCharacter::UpdateEliminatedText()
+{
+	BlasterPlayerController = !BlasterPlayerController ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
+	if (BlasterPlayerController)
+	{
+		BlasterPlayerController->HideEliminatedText();
+	}
+}
+
 void ABlasterCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
@@ -205,15 +214,6 @@ float ABlasterCharacter::CalculateSpeed()
 	Velocity.Z = 0.f;
 
 	return Velocity.Size();
-}
-
-void ABlasterCharacter::UpdateEliminatedText()
-{
-	BlasterPlayerController = !BlasterPlayerController ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
-	if (BlasterPlayerController)
-	{
-		BlasterPlayerController->HideEliminatedText();
-	}
 }
 
 void ABlasterCharacter::Eliminated(ABlasterPlayerController* AttackController)
@@ -241,6 +241,7 @@ void ABlasterCharacter::MulticastEliminated_Implementation(const FString& Attack
 	if (BlasterPlayerController)
 	{
 		BlasterPlayerController->SetHUDWeaponAmmo(0);
+		BlasterPlayerController->SetHUDWeaponType(FText::FromString(""));
 	}
 	bEliminated = true;
 	PlayDeathMontage();
