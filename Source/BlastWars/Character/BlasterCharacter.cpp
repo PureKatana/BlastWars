@@ -20,6 +20,7 @@
 #include "Sound/SoundCue.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
+#include "BlastWars/PlayerState/BlasterPlayerState.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -115,6 +116,20 @@ void ABlasterCharacter::Tick(float DeltaTime)
 	//If the character is close to the camera
 	HideCamera();
 
+	// Poll all relevant classes and initialize HUD
+	PollInitialize();
+}
+
+void ABlasterCharacter::PollInitialize()
+{
+	if (!BlasterPlayerState)
+	{
+		BlasterPlayerState = GetPlayerState<ABlasterPlayerState>();
+		if (BlasterPlayerState)
+		{
+			BlasterPlayerState->AddToScore(0.f);
+		}
+	}
 }
 
 // Called to bind functionality to input

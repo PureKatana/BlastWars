@@ -65,6 +65,9 @@ protected:
 	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
 	void HitEffect(AActor* OtherActor);
 
+	// Poll for any relevant classes and initialize HUD
+	void PollInitialize();
+
 private :
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	class USpringArmComponent* CameraBoom;
@@ -153,6 +156,7 @@ private :
 	UPROPERTY(EditAnywhere)
 	class USoundCue* DeathSound;
 	
+	class ABlasterPlayerState* BlasterPlayerState;
 
 public:	
 	void SetOverlappingWeapon(AWeapon* Weapon);

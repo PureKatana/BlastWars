@@ -17,6 +17,7 @@ class BLASTWARS_API ABlasterPlayerController : public APlayerController
 public:
 
 	void SetHUDHealth(float Health, float MaxHealth);
+	void SetHUDScore(float Score);
 	virtual void OnPossess(APawn* InPawn) override;
 
 protected:
@@ -26,6 +27,4 @@ protected:
 private:
 
 	class ABlasterHUD* BlasterHUD;
-
-	
 };
