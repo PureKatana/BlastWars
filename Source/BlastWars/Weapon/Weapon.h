@@ -35,6 +35,8 @@ public:
 	void ShowPickupWidget(bool bShowWidget);
 	virtual void Fire(const FVector& HitTarget);
 	void Dropped();
+	void AddAmmo(int32 AmmoToAdd);
+
 	// Textures for the weapon crosshair
 
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
@@ -62,6 +64,8 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	bool bAutomatic = true;
 
+	UPROPERTY(EditAnywhere)
+	class USoundCue* EquipSound;
 
 protected:
 	// Called when the game starts or when spawned
@@ -114,4 +118,6 @@ public:
 	FORCEINLINE bool IsEmpty() { return Ammo <= 0; }
 	FORCEINLINE USoundCue* GetEmptyShotSoundCue() { return EmptyShotSoundCue; }
 	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
+	FORCEINLINE int32 GetAmmo() const { return Ammo; }
+	FORCEINLINE int32 GetMagCapacity() const { return MagCapacity; }
 };
