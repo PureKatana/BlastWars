@@ -4,7 +4,6 @@
 #include "OverheadWidget.h"
 #include "Components/TextBlock.h"
 #include "GameFramework/PlayerState.h"
-#include "BlastWars/PlayerState/BlasterPlayerState.h"
 
 void UOverheadWidget::SetDisplayText(FString Text)
 {
@@ -42,7 +41,7 @@ void UOverheadWidget::ShowPlayerName(APawn* InPawn)
 	FString PlayerName = "";
 	if (InPawn)
 	{
-		ABlasterPlayerState* PlayerState = Cast<ABlasterPlayerState>(InPawn->GetPlayerState());
+		APlayerState* PlayerState = InPawn->GetPlayerState();
 		if (PlayerState)
 		{
 			PlayerName = PlayerState->GetPlayerName();

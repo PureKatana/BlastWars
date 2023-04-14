@@ -8,8 +8,10 @@
 #include "GameFramework/PlayerStart.h"
 #include "BlastWars/PlayerState/BlasterPlayerState.h"
 
+
 void ABlastWarsGameMode::PlayerEliminated(ABlasterCharacter* EliminatedCharacter, ABlasterPlayerController* VictimController, ABlasterPlayerController* AttackerController)
 {
+	
 	ABlasterPlayerState* AttackerPlayerState = AttackerController ? Cast<ABlasterPlayerState>(AttackerController->PlayerState) : nullptr;
 	ABlasterPlayerState* VictimPlayerState = VictimController ? Cast<ABlasterPlayerState>(VictimController->PlayerState) : nullptr;
 
@@ -22,11 +24,12 @@ void ABlastWarsGameMode::PlayerEliminated(ABlasterCharacter* EliminatedCharacter
 	{
 		VictimPlayerState->AddToDeaths(1.f);
 	}
-
+	
 	if (EliminatedCharacter)
 	{
 		EliminatedCharacter->Eliminated(AttackerController);
 	}
+	
 }
 
 void ABlastWarsGameMode::RequestRespawn(ACharacter* EliminatedCharacter, AController* EliminatedController)
@@ -35,7 +38,7 @@ void ABlastWarsGameMode::RequestRespawn(ACharacter* EliminatedCharacter, AContro
 	{
 		// Character unpossess
 		EliminatedCharacter->Reset();
-		
+
 		EliminatedCharacter->Destroy();
 	}
 

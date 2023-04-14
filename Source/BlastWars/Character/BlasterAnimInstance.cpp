@@ -25,7 +25,9 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 		return;
 	}
 
-	GroundSpeed = BlasterCharacter->CalculateSpeed();
+	FVector Velocity = BlasterCharacter->GetVelocity();
+	Velocity.Z = 0.f;
+	GroundSpeed = Velocity.Size();
 
 	bIsFalling = BlasterCharacter->GetCharacterMovement()->IsFalling();
 	bIsAccelerating = BlasterCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f ? true : false;
@@ -75,8 +77,8 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 			RightHandRotation = FMath::RInterpTo(RightHandRotation, LookAtRotation, DeltaTime, 30.f);
 		}
 	}
-
 	bUseFABRIK = BlasterCharacter->GetCombatState() != ECombatState::ECS_Reloading;
 	bUseAimOfssets = BlasterCharacter->GetCombatState() != ECombatState::ECS_Reloading;
 	bTransformRightHand = BlasterCharacter->GetCombatState() != ECombatState::ECS_Reloading;
+
 }

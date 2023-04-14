@@ -5,9 +5,9 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "BlastWars/Types/TurningInPlace.h"
+#include "BlastWars/Types/CombatState.h"
 #include "BlastWars/Interfaces/InteractWithCrosshairsInterface.h"
 #include "Components/TimelineComponent.h"
-#include "BlastWars/Types/CombatState.h"
 #include "BlasterCharacter.generated.h"
 
 
@@ -35,7 +35,6 @@ public:
 	void PlayHitReactMontage();
 
 	virtual void OnRep_ReplicatedMovement() override;
-	float CalculateSpeed();
 
 	void Eliminated(class ABlasterPlayerController* AttackerController);
 
@@ -45,33 +44,27 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
 	void UpdateHUDHealth();
 	void UpdateEliminatedText();
-
 	void MoveForward(float Value);
 	void MoveRight(float Value);
 	void Turn(float Value);
 	void LookUp(float Value);
 	void EquipPressed();
 	void CrouchPressed();
-	void ReloadPressed();
 	void AimPressed();
 	void AimReleased();
 	void AimOffset(float DeltaTime);
 	void CalculateAO_Pitch();
-	void SimulatedProxiesTurn();
+	void SimProxiesTurn();
 	virtual void Jump() override;
 	void FirePressed();
 	void FireReleased();
-
+	void ReloadPressed();
 	UFUNCTION()
 	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
-	void HitEffect(AActor* OtherActor);
-
 	// Poll for any relevant classes and initialize HUD
 	void PollInitialize();
-
 private :
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	class USpringArmComponent* CameraBoom;
@@ -120,10 +113,11 @@ private :
 
 	bool bRotateRootBone;
 	float TurnThreshold = 0.5f;
-	FRotator ProxyRotLastFrame;
-	FRotator ProxyRot;
+	FRotator ProxyRotationLastFrame;
+	FRotator ProxyRotation;
 	float ProxyYaw;
 	float TimeSinceLastMovementReplication;
+	float CalculateSpeed();
 
 	// Player Health
 
@@ -135,15 +129,20 @@ private :
 	void OnRep_Health();
 	UPROPERTY()
 	ABlasterPlayerController* BlasterPlayerController;
-
 	bool bEliminated = false;
+	
+	// Death
 
 	FTimerHandle EliminatedTimer;
 	UPROPERTY(EditDefaultsOnly)
 	float EliminatedDelay = 3.f;
 	void EliminatedTimerFinished();
+	UPROPERTY(EditAnywhere)
+	class UNiagaraSystem* DeathParticles;
+	UPROPERTY(EditAnywhere)
+	class USoundCue* DeathSound;
 
-	// Dissolve effect
+	// Dissolve
 
 	UPROPERTY(VisibleAnywhere)
 	UTimelineComponent* DissolveTimeline;
@@ -159,10 +158,6 @@ private :
 	// Material Instance set on the blueprint, used with the dynamic material instance
 	UPROPERTY(EditAnywhere, Category = Elimination)
 	UMaterialInstance* DissolveMaterialInstance;
-	UPROPERTY(EditAnywhere)
-	class UNiagaraSystem* DeathParticles;
-	UPROPERTY(EditAnywhere)
-	class USoundCue* DeathSound;
 
 	UPROPERTY()
 	class ABlasterPlayerState* BlasterPlayerState;
@@ -178,8 +173,8 @@ public:
 	FVector GetHitTarget() const;
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 	FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
-	FORCEINLINE bool IsEliminated() const { return bEliminated; }
 	FORCEINLINE float GetHealth() const { return Health; }
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
+	FORCEINLINE bool IsEliminated() const { return bEliminated; }
 	ECombatState GetCombatState() const;
 };

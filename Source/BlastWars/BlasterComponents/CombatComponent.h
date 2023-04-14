@@ -35,7 +35,7 @@ protected:
 	void SetAiming(bool bIsAiming);
 
 	UFUNCTION(Server, Reliable)
-	void ServerSetAiming(bool bIsAiming); 
+		void ServerSetAiming(bool bIsAiming); 
 
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
@@ -68,19 +68,14 @@ private:
 	class ABlasterPlayerController* Controller;
 	UPROPERTY()
 	class ABlasterHUD* HUD;
-
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
     AWeapon* EquippedWeapon;
-
 	UPROPERTY(Replicated)
 	bool bAiming;
-
 	UPROPERTY(EditAnywhere)
 	float BaseWalkSpeed;
-
 	UPROPERTY(EditAnywhere)
 	float AimWalkSpeed;
-
 	bool bFirePressed;
 
 	//HUD and Crosshairs
@@ -97,29 +92,23 @@ private:
 
 	// FOV when not aiming (camera's base FOV)
 	float DefaultFOV;
-
 	float CurrentFOV;
-
 	UPROPERTY(EditAnywhere, Category = Combat)
 	float ZoomedFOV = 30.f;
-
 	UPROPERTY(EditAnywhere, Category = Combat)
 	float ZoomInterpSpeed = 20.f;
-
 	void InterpFOV(float DeltaTime);
 
 	// Automatic Fire
 
 	FTimerHandle FireTimer;
-
-	void StartFireTimer();
-	void FireTimerFinished();
-
 	bool bCanFire = true;
+	void FireTimerFinished();
+	void StartFireTimer();
 
 	// Carried Ammo
-
 	bool CanFire();
+	
 	// Carried ammo for the currently-equipped weapon
 	UPROPERTY(ReplicatedUsing = OnRep_CarriedAmmo)
 	int32 CarriedAmmo;
@@ -141,6 +130,8 @@ private:
 
 	void UpdateAmmoValues();
 	FText GetDisplayNameWeaponType() const;
+	
+
 public:	
 	
 

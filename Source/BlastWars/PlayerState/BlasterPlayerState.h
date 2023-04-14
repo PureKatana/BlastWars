@@ -13,12 +13,13 @@ UCLASS()
 class BLASTWARS_API ABlasterPlayerState : public APlayerState
 {
 	GENERATED_BODY()
+
 public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void OnRep_Score() override;
 	UFUNCTION()
-	virtual void OnRep_Deaths();
+		virtual void OnRep_Deaths();
 	void AddToScore(float ScoreAmount);
 	void AddToDeaths(float DeathsAmount);
 

@@ -40,4 +40,5 @@ private:
 
 	float MatchTime = 120.f;
 	uint32 CountdownInt = 0;
+	
 };

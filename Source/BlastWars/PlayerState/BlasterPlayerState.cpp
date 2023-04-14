@@ -74,4 +74,3 @@ void ABlasterPlayerState::OnRep_Deaths()
 	}
 }
 
-

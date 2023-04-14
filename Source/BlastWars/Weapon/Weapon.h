@@ -31,14 +31,13 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void OnRep_Owner() override;
-	void SetHUDAmmo();
 	void ShowPickupWidget(bool bShowWidget);
 	virtual void Fire(const FVector& HitTarget);
 	void Dropped();
 	void AddAmmo(int32 AmmoToAdd);
+	void SetHUDAmmo();
 
 	// Textures for the weapon crosshair
-
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
 	class UTexture2D* CrosshairCenter;
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
@@ -51,19 +50,18 @@ public:
 	UTexture2D* CrosshairBottom;
 
 	// FOV Zoomed while aiming
-
 	UPROPERTY(EditAnywhere)
 	float ZoomedFOV = 30.f;
 	UPROPERTY(EditAnywhere)
 	float ZoomInterpSpeed = 20.f;
 
 	// Automatic Fire
-
-	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
+	UPROPERTY(EditAnywhere, Category = Combat)
 	float FireDelay = 0.15f;
-	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
+	UPROPERTY(EditAnywhere, Category = Combat)
 	bool bAutomatic = true;
 
+	// Equip Sound
 	UPROPERTY(EditAnywhere)
 	class USoundCue* EquipSound;
 
@@ -79,6 +77,7 @@ protected:
 	void OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 private:
+
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	USkeletalMeshComponent* WeaponMesh;
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
@@ -93,6 +92,12 @@ private:
 	class UAnimationAsset* FireAnimation;
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class ABulletShell> BulletShellClass;
+	UPROPERTY()
+	class ABlasterCharacter* BlasterOwnerCharacter;
+	UPROPERTY()
+	class ABlasterPlayerController* BlasterOwnerController;
+	UPROPERTY(EditAnywhere)
+	class USoundCue* EmptyShotSoundCue;
 	UPROPERTY(EditAnywhere, ReplicatedUsing = OnRep_Ammo)
 	int32 Ammo;
 	UPROPERTY(EditAnywhere)
@@ -100,15 +105,9 @@ private:
 	UFUNCTION()
 	void OnRep_Ammo();
 	void SpendRound();
-	UPROPERTY()
-	class ABlasterCharacter* BlasterOwnerCharacter;
-	UPROPERTY()
-	class ABlasterPlayerController* BlasterOwnerController;
-	UPROPERTY(EditAnywhere)
-	class USoundCue* EmptyShotSoundCue;
 	UPROPERTY(EditAnywhere)
 	EWeaponType WeaponType;
-
+	
 public:	
 	void SetWeaponState(EWeaponState State);
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
