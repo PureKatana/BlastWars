@@ -479,6 +479,15 @@ FText UCombatComponent::GetDisplayNameWeaponType() const
 {
 	if (!EquippedWeapon) return FText::FromString("");
 
-	FText WeaponTypeText = StaticEnum<EWeaponType>()->GetDisplayNameTextByIndex(static_cast<int32>(EquippedWeapon->GetWeaponType()));
+	FText WeaponTypeText;
+	switch (EquippedWeapon->GetWeaponType())
+	{
+	case EWeaponType::EWT_AssaultRifle:
+		WeaponTypeText = FText::FromString("Assault Rifle");
+		break;
+	case EWeaponType::EWT_MAX:
+		WeaponTypeText = FText::FromString("");
+		break;
+	}
 	return WeaponTypeText;
 }

@@ -23,6 +23,7 @@ public:
 	void SetHUDWeaponAmmo(int32 Ammo);
 	void SetHUDCarriedAmmo(int32 Ammo);
 	void SetHUDWeaponType(FText WeaponType);
+	void SetHUDMatchCountdown(float CountdownTime);
 	void HideEliminatedText();
 
 	virtual void OnPossess(APawn* InPawn) override;
@@ -30,9 +31,13 @@ public:
 protected:
 
 	virtual void BeginPlay() override;
-
+	void SetHUDTime();
+	virtual void Tick(float DeltaTime) override;
 private:
 
 	UPROPERTY()
 	class ABlasterHUD* BlasterHUD;
+
+	float MatchTime = 120.f;
+	uint32 CountdownInt = 0;
 };
