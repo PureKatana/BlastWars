@@ -8,6 +8,31 @@
 #include "GameFramework/PlayerStart.h"
 #include "BlastWars/PlayerState/BlasterPlayerState.h"
 
+ABlastWarsGameMode::ABlastWarsGameMode()
+{
+	bDelayedStart = true;
+}
+
+void ABlastWarsGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+
+	LevelStartingTime = GetWorld()->GetTimeSeconds();
+}
+
+void ABlastWarsGameMode::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (MatchState == MatchState::WaitingToStart)
+	{
+		CountdownTime = WarmupTime - GetWorld()->GetTimeSeconds() + LevelStartingTime;
+		if (CountdownTime <= 0.f)
+		{
+			StartMatch();
+		}
+	}
+}
 
 void ABlastWarsGameMode::PlayerEliminated(ABlasterCharacter* EliminatedCharacter, ABlasterPlayerController* VictimController, ABlasterPlayerController* AttackerController)
 {

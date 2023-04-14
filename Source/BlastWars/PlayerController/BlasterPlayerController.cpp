@@ -61,7 +61,6 @@ void ABlasterPlayerController::ReceivedPlayer()
 	{
 		ServerRequestServerTime(GetWorld()->GetTimeSeconds());
 	}
-
 }
 
 void ABlasterPlayerController::SetHUDTime()

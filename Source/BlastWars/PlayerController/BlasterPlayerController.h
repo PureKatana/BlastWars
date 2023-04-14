@@ -25,6 +25,7 @@ public:
 	void SetHUDWeaponType(FText WeaponType);
 	void SetHUDMatchCountdown(float CountdownTime);
 	void HideEliminatedText();
+
 	virtual void OnPossess(APawn* InPawn) override;
 	// Synced with server world clock
 	virtual float GetServerTime();
@@ -52,8 +53,6 @@ protected:
 	float TimeSyncFrequency = 5.f;
 	float TimeSyncRunningTime = 0.f;
 	void CheckTimeSync(float DeltaTime);
-
-
 private:
 
 	UPROPERTY()
