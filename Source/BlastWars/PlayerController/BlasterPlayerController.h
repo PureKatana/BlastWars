@@ -31,11 +31,14 @@ public:
 	virtual float GetServerTime();
 	// Sync with server clock as soon as possible
 	virtual void ReceivedPlayer() override;
+	void OnMatchStateSet(FName State);
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
 
 	virtual void BeginPlay() override;
 	void SetHUDTime();
+	void PollInitialize();
 	virtual void Tick(float DeltaTime) override;
 
 	// Sync time between clients and server
@@ -53,6 +56,9 @@ protected:
 	float TimeSyncFrequency = 5.f;
 	float TimeSyncRunningTime = 0.f;
 	void CheckTimeSync(float DeltaTime);
+
+	void HandleMatchHasStarted();
+
 private:
 
 	UPROPERTY()
@@ -60,5 +66,19 @@ private:
 
 	float MatchTime = 120.f;
 	uint32 CountdownInt = 0;
-	
+
+	UPROPERTY(ReplicatedUsing = OnRep_MatchState)
+	FName MatchState;
+	UFUNCTION()
+	void OnRep_MatchState();
+
+	UPROPERTY()
+	class UCharacterOverlay* CharacterOverlay;
+	bool bInitializeCharacterOverlay = false;
+
+	float HUDHealth;
+	float HUDMaxHealth;
+	float HUDScore;
+	float HUDDeaths;
+
 };
