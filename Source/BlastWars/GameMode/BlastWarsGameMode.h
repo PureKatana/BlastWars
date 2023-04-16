@@ -6,6 +6,12 @@
 #include "GameFramework/GameMode.h"
 #include "BlastWarsGameMode.generated.h"
 
+namespace MatchState
+{
+	// Match duration ended, display winner and begin cooldown timer
+	extern BLASTWARS_API const FName Cooldown;
+}
+
 /**
  * 
  */
@@ -24,6 +30,8 @@ public:
 	float WarmupTime = 10.f;
 	UPROPERTY(EditDefaultsOnly)
 	float MatchTime = 120.f;
+	UPROPERTY(EditDefaultsOnly)
+	float CooldownTime = 10.f;
 	float LevelStartingTime = 0.f;
 
 protected:
@@ -34,4 +42,8 @@ protected:
 private:
 
 	float CountdownTime = 0.f;
+
+public:
+
+	FORCEINLINE float GetCountdownTime() const { return CountdownTime; }
 };

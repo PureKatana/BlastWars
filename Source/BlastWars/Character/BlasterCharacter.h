@@ -41,9 +41,13 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastEliminated(const FString& AttackerName);
 
+	UPROPERTY(Replicated)
+	bool bDisableGameplay = false;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void Destroyed() override;
 	void UpdateHUDHealth();
 	void UpdateEliminatedText();
 	void MoveForward(float Value);
@@ -65,6 +69,7 @@ protected:
 	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
 	// Poll for any relevant classes and initialize HUD
 	void PollInitialize();
+	void RotateInPlace(float DeltaTime);
 private :
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	class USpringArmComponent* CameraBoom;
@@ -177,4 +182,5 @@ public:
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
 	FORCEINLINE bool IsEliminated() const { return bEliminated; }
 	ECombatState GetCombatState() const;
+	FORCEINLINE UCombatComponent* GetCombat() const { return Combat; }
 };

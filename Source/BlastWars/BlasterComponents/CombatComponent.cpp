@@ -491,7 +491,7 @@ FText UCombatComponent::GetDisplayNameWeaponType() const
 		WeaponTypeText = FText::FromString("Assault Rifle");
 		break;
 	case EWeaponType::EWT_MAX:
-		WeaponTypeText = FText::FromString("");
+		WeaponTypeText = FText();
 		break;
 	}
 	return WeaponTypeText;

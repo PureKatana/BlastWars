@@ -29,6 +29,8 @@ public:
 	void Reload();
 	UFUNCTION(Blueprintcallable)
 	void FinishedReloading();
+
+	void FirePressed(bool bPressed);
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -39,8 +41,6 @@ protected:
 
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
-
-	void FirePressed(bool bPressed);
 
 	void Fire();
 
