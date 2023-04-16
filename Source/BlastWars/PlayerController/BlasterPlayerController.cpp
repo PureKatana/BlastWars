@@ -12,6 +12,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "BlastWars/BlasterComponents/CombatComponent.h"
+#include "BlastWars/GameState/BlastWarsGameState.h"
+#include "BlastWars/PlayerState/BlasterPlayerState.h"
 
 void ABlasterPlayerController::BeginPlay()
 {
@@ -172,6 +174,35 @@ void ABlasterPlayerController::HandleCooldown()
 			BlasterHUD->Announcement->SetVisibility(ESlateVisibility::Visible);
 			FString AnnouncementText("New Match Starts in : ");
 			BlasterHUD->Announcement->AnnouncementText->SetText(FText::FromString(AnnouncementText));
+
+			ABlastWarsGameState* BlastWarsGameState = Cast<ABlastWarsGameState>(UGameplayStatics::GetGameState(this));
+			ABlasterPlayerState* BlasterPlayerState = GetPlayerState<ABlasterPlayerState>();
+			if (BlastWarsGameState && BlasterPlayerState)
+			{
+				TArray<ABlasterPlayerState*> TopPlayers = BlastWarsGameState->TopScoringPlayers;
+				FString InfoText;
+				if (TopPlayers.IsEmpty()) // no player
+				{
+					InfoText = FString("There is no winner");
+				}
+				else if (TopPlayers.Num() == 1 && TopPlayers[0] == BlasterPlayerState) // this player
+				{
+					InfoText = FString("You are the winner");
+				}
+				else if (TopPlayers.Num() == 1) // other player
+				{
+					InfoText = FString::Printf(TEXT("%s\nis the winner"), *TopPlayers[0]->GetPlayerName());
+				}
+				else if (TopPlayers.Num() > 1) // at least 2 players
+				{
+					InfoText = FString("Players tied for the win :\n");
+					for (auto TiedPlayer : TopPlayers)
+					{
+						InfoText.Append(FString::Printf(TEXT("%s\n"), *TiedPlayer->GetPlayerName()));
+					}
+				}
+				BlasterHUD->Announcement->InfoText->SetText(FText::FromString(InfoText));
+			}
 		}
 	}
 	ABlasterCharacter* BlasterCharacter = Cast <ABlasterCharacter>(GetPawn());
@@ -200,7 +231,7 @@ void ABlasterPlayerController::SetHUDTime()
 	}
 	uint32 SecondsLeft = FMath::CeilToInt(TimeLeft);
 
-	/*
+	
 	if (HasAuthority())
 	{
 		BlastWarsGameMode = !BlastWarsGameMode ? Cast<ABlastWarsGameMode>(UGameplayStatics::GetGameMode(this)) : BlastWarsGameMode;
@@ -208,7 +239,7 @@ void ABlasterPlayerController::SetHUDTime()
 		{
 			SecondsLeft = FMath::CeilToInt(BlastWarsGameMode->GetCountdownTime() + LevelStartingTime);
 		}
-	}*/
+	}
 
 	if (CountdownInt != SecondsLeft)
 	{
@@ -355,7 +386,7 @@ void ABlasterPlayerController::SetHUDMatchCountdown(float CountdownTime)
 		int32 Minutes = FMath::FloorToInt(CountdownTime / 60.f);
 		int32 Seconds = CountdownTime - (Minutes * 60.f);
 
-		FString CountdownText = FString::Printf(TEXT("%02d : %02d"), Minutes, Seconds);
+		FString CountdownText =  FString::Printf(TEXT("%02d : %02d"), Minutes, Seconds);
 		BlasterHUD->CharacterOverlay->MatchCountdownText->SetText(FText::FromString(CountdownText));
 	}
 }

@@ -92,7 +92,9 @@ void ABlasterCharacter::BeginPlay()
 void ABlasterCharacter::Destroyed()
 {
 	Super::Destroyed();
-	if (Combat && Combat->EquippedWeapon)
+	ABlastWarsGameMode* BlastWarsGameMode = Cast<ABlastWarsGameMode>(UGameplayStatics::GetGameMode(this));
+	bool bMatchNotInProgress = BlastWarsGameMode && BlastWarsGameMode->GetMatchState() != MatchState::InProgress;
+	if (Combat && Combat->EquippedWeapon && bMatchNotInProgress)
 	{
 		Combat->EquippedWeapon->Destroy();
 	}
@@ -593,13 +595,19 @@ void ABlasterCharacter::MulticastEliminated_Implementation(const FString& Attack
 		DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Glow"), 100.f);
 	}
 	StartDissolve();
-	
+
+	// Disable Inputs
+	bDisableGameplay = true;
+	if(Combat)
+	{
+		Combat->FirePressed(false);
+	}
+
 	// Disable Character Movement
 	GetCharacterMovement()->DisableMovement();
 	GetCharacterMovement()->StopMovementImmediately();
 	if (BlasterPlayerController)
 	{
-		bDisableGameplay = true;
 		BlasterPlayerController->SetHUDEliminationText(AttackerName);
 	}
 
