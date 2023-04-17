@@ -36,13 +36,15 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	void HandleMatchHasStarted();
 	void HandleCooldown();
+	virtual void SetupInputComponent() override;
 protected:
 
 	virtual void BeginPlay() override;
 	void SetHUDTime();
 	void PollInitialize();
 	virtual void Tick(float DeltaTime) override;
-
+	UPROPERTY(EditAnywhere, Category = Input)
+	class UInputMappingContext* BlasterCharacterMappingContext;
 	// Sync time between clients and server
 
 	// Requests the current server time, passing in the client's time when the request was sent

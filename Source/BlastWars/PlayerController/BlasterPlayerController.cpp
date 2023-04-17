@@ -14,6 +14,9 @@
 #include "BlastWars/BlasterComponents/CombatComponent.h"
 #include "BlastWars/GameState/BlastWarsGameState.h"
 #include "BlastWars/PlayerState/BlasterPlayerState.h"
+#include "Components/InputComponent.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
 
 void ABlasterPlayerController::BeginPlay()
 {
@@ -21,6 +24,27 @@ void ABlasterPlayerController::BeginPlay()
 
 	BlasterHUD = Cast<ABlasterHUD>(GetHUD());
 	ServerCheckMatchState();
+}
+
+void ABlasterPlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+
+	ULocalPlayer* LocalPlayer = GetLocalPlayer();
+	if (LocalPlayer)
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+		{
+			Subsystem->ClearAllMappings();
+			Subsystem->AddMappingContext(BlasterCharacterMappingContext, 0);
+		}
+	}
+
+	// We simply can access the Input Component and add bindings
+	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent))
+	{
+
+	}
 }
 
 void ABlasterPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

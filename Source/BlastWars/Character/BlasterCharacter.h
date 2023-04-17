@@ -11,7 +11,6 @@
 #include "InputActionValue.h"
 #include "BlasterCharacter.generated.h"
 
-class UInputMappingContext;
 class UInputAction;
 
 UCLASS()
@@ -52,8 +51,6 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void Destroyed() override;
 
-	UPROPERTY(EditAnywhere, Category = Input)
-	UInputMappingContext* BlasterCharacterMappingContext;
 	UPROPERTY(EditAnywhere, Category = Input)
 	UInputAction* MoveAction;
 	UPROPERTY(EditAnywhere, Category = Input)

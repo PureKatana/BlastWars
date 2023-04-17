@@ -83,15 +83,6 @@ void ABlasterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	// Hard coded in blueprint instead
-	/*
-	if (BlasterPlayerController = !BlasterPlayerController ? Cast<ABlasterPlayerController>(GetController()) : BlasterPlayerController)
-	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(BlasterPlayerController->GetLocalPlayer()))
-		{
-			Subsystem->AddMappingContext(BlasterCharacterMappingContext, 0);
-		}
-	}*/
 	UpdateHUDHealth();
 	UpdateEliminatedText();
 	if (HasAuthority())
