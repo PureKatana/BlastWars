@@ -66,10 +66,19 @@ void AProjectile::MulticastOnHit_Implementation(UPrimitiveComponent* HitComp, AA
 		{
 			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), HitParticles, GetActorLocation());
 		}
+		else if(ImpactParticles)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
+		}
+
 
 		if (HitSound)
 		{
 			UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, GetActorLocation());
+		}
+		else if(ImpactSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
 		}
 	}
 	else

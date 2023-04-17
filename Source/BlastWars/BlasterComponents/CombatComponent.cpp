@@ -276,6 +276,7 @@ void UCombatComponent::InitializeCarriedAmmo()
 {
 	// Emplace avoids adding any temporaries when inserting into the map (Temporaries are objects that are created and destroyed in the same expression)
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_AssaultRifle, StartingARAmmo);
+	CarriedAmmoMap.Emplace(EWeaponType::EWT_RocketLauncher, StartingRocketAmmo);
 }
 
 void UCombatComponent::Reload()
@@ -489,6 +490,9 @@ FText UCombatComponent::GetDisplayNameWeaponType() const
 	{
 	case EWeaponType::EWT_AssaultRifle:
 		WeaponTypeText = FText::FromString("Assault Rifle");
+		break;
+	case EWeaponType::EWT_RocketLauncher:
+		WeaponTypeText = FText::FromString("Rocket Launcher");
 		break;
 	case EWeaponType::EWT_MAX:
 		WeaponTypeText = FText();

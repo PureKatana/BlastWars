@@ -73,7 +73,6 @@ void ABlastWarsGameMode::OnMatchStateSet()
 
 void ABlastWarsGameMode::PlayerEliminated(ABlasterCharacter* EliminatedCharacter, ABlasterPlayerController* VictimController, ABlasterPlayerController* AttackerController)
 {
-	
 	ABlasterPlayerState* AttackerPlayerState = AttackerController ? Cast<ABlasterPlayerState>(AttackerController->PlayerState) : nullptr;
 	ABlasterPlayerState* VictimPlayerState = VictimController ? Cast<ABlasterPlayerState>(VictimController->PlayerState) : nullptr;
 	ABlastWarsGameState* BlastWarsGameState = GetGameState<ABlastWarsGameState>();
