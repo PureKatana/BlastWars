@@ -8,8 +8,11 @@
 #include "BlastWars/Types/CombatState.h"
 #include "BlastWars/Interfaces/InteractWithCrosshairsInterface.h"
 #include "Components/TimelineComponent.h"
+#include "InputActionValue.h"
 #include "BlasterCharacter.generated.h"
 
+class UInputMappingContext;
+class UInputAction;
 
 UCLASS()
 class BLASTWARS_API ABlasterCharacter : public ACharacter, public IInteractWithCrosshairsInterface
@@ -48,12 +51,33 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	virtual void Destroyed() override;
+
+	UPROPERTY(EditAnywhere, Category = Input)
+	UInputMappingContext* BlasterCharacterMappingContext;
+	UPROPERTY(EditAnywhere, Category = Input)
+	UInputAction* MoveAction;
+	UPROPERTY(EditAnywhere, Category = Input)
+	UInputAction* LookAction;
+	UPROPERTY(EditAnywhere, Category = Input)
+	UInputAction* JumpAction;
+	UPROPERTY(EditAnywhere, Category = Input)
+	UInputAction* CrouchAction;
+	UPROPERTY(EditAnywhere, Category = Input)
+	UInputAction* EquipAction;
+	UPROPERTY(EditAnywhere, Category = Input)
+	UInputAction* AimAction;
+	UPROPERTY(EditAnywhere, Category = Input)
+	UInputAction* AimReleasedAction;
+	UPROPERTY(EditAnywhere, Category = Input)
+	UInputAction* FireAction;
+	UPROPERTY(EditAnywhere, Category = Input)
+	UInputAction* FireReleasedAction;
+	UPROPERTY(EditAnywhere, Category = Input)
+	UInputAction* ReloadAction;
 	void UpdateHUDHealth();
 	void UpdateEliminatedText();
-	void MoveForward(float Value);
-	void MoveRight(float Value);
-	void Turn(float Value);
-	void LookUp(float Value);
+	void Move(const FInputActionValue& Value);
+	void Look(const FInputActionValue& Value);
 	void EquipPressed();
 	void CrouchPressed();
 	void AimPressed();
