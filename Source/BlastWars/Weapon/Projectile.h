@@ -27,22 +27,13 @@ protected:
 	void MulticastOnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 	UPROPERTY(EditAnywhere)
-	float Damage = 20.f;
-
-private:
-	UPROPERTY(EditAnywhere)
 	class UBoxComponent* CollisionBox;
 
-	UPROPERTY(VisibleAnywhere)
-	class UProjectileMovementComponent* ProjectileMovementComponent;
+	UPROPERTY(EditAnywhere)
+	float Damage = 20.f;
 
 	UPROPERTY(EditAnywhere)
-	class UParticleSystem* Tracer;
-
-	class UParticleSystemComponent* TracerComponent;
-
-	UPROPERTY(EditAnywhere)
-	UParticleSystem* ImpactParticles;
+	class UParticleSystem* ImpactParticles;
 
 	UPROPERTY(EditAnywhere)
 	class USoundCue* ImpactSound;
@@ -52,6 +43,15 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	USoundCue* HitSound;
+
+    UPROPERTY(VisibleAnywhere)
+	class UProjectileMovementComponent* ProjectileMovementComponent;
+private:
+
+	UPROPERTY(EditAnywhere)
+	class UParticleSystem* Tracer;
+
+	UParticleSystemComponent* TracerComponent;
 
 public:	
 	

@@ -254,6 +254,9 @@ void ABlasterCharacter::PlayReloadMontage()
 		case EWeaponType::EWT_AssaultRifle:
 			SectionName = FName("AR");
 			break;
+		case EWeaponType::EWT_RocketLauncher:
+			SectionName = FName("AR");
+			break;
 		}
 		AnimInstance->Montage_JumpToSection(SectionName);
 	}
@@ -540,15 +543,15 @@ void ABlasterCharacter::TurnInPlace(float DeltaTime)
 
 void ABlasterCharacter::Eliminated(ABlasterPlayerController* AttackController)
 {
-	
 	if (IsWeaponEquipped())
 	{
 		Combat->EquippedWeapon->Dropped();
 	}
 	
-	FString AttackerName;
+	FString AttackerName = "";
 	ABlasterPlayerController* AttackerBlasterController = AttackController;
-	if (AttackerBlasterController)
+	BlasterPlayerController = !BlasterPlayerController ? Cast<ABlasterPlayerController>(GetController()) : BlasterPlayerController;
+	if (AttackerBlasterController && AttackerBlasterController != BlasterPlayerController)
 	{
 		ABlasterPlayerState* AttackerPlayerState = Cast<ABlasterPlayerState>(AttackerBlasterController->PlayerState);
 		if (AttackerPlayerState)
