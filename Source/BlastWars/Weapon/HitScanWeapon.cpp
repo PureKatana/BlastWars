@@ -17,8 +17,6 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 	if (!OwnerPawn) return;
 	AController* InstigatorController = OwnerPawn->GetController();
 
-	
-
 	const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName("MuzzleFlash");
 	if (MuzzleFlashSocket)
 	{
@@ -48,7 +46,7 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 					}
 					if (HitSound)
 					{
-						UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, FireHit.ImpactPoint);
+						UGameplayStatics::PlaySoundAtLocation(this, HitSound, FireHit.ImpactPoint);
 					}
 				}
 				else
@@ -59,7 +57,7 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 					}
 					if (ImpactSound)
 					{
-						UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSound, FireHit.ImpactPoint);
+						UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, FireHit.ImpactPoint);
 					}
 				}
 			}
@@ -71,6 +69,14 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 					Beam->SetVectorParameter(FName("Target"), EndBeam);
 				}
 			}
+		}
+		if (MuzzleFlash)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(World, MuzzleFlash, SocketTransform);
+		}
+		if (FireSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
 		}
 	}
 }

@@ -278,6 +278,7 @@ void UCombatComponent::InitializeCarriedAmmo()
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_AssaultRifle, StartingARAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_RocketLauncher, StartingRocketAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_Pistol, StartingPistolAmmo);
+	CarriedAmmoMap.Emplace(EWeaponType::EWT_SubmachineGun, StartingSMGAmmo);
 }
 
 void UCombatComponent::Reload()
@@ -497,6 +498,9 @@ FText UCombatComponent::GetDisplayNameWeaponType() const
 		break;
 	case EWeaponType::EWT_Pistol:
 		WeaponTypeText = FText::FromString("Pistol");
+		break;
+	case EWeaponType::EWT_SubmachineGun:
+		WeaponTypeText = FText::FromString("Submachine Gun");
 		break;
 	case EWeaponType::EWT_MAX:
 		WeaponTypeText = FText();

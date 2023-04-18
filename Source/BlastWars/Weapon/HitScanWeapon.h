@@ -37,5 +37,12 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* BeamParticles;
+
+	// For SMG since it doesn't have a fire animation
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* MuzzleFlash;
+
+	UPROPERTY(EditAnywhere)
+	USoundCue* FireSound;
 	
 };
