@@ -219,7 +219,6 @@ void UCombatComponent::Fire()
 			if (EquippedWeapon->GetEmptyShotSoundCue())
 			{
 				UGameplayStatics::PlaySoundAtLocation(GetWorld(), EquippedWeapon->GetEmptyShotSoundCue(), EquippedWeapon->GetActorLocation());
-				StartFireTimer();
 			}
 		}
 	}
@@ -279,6 +278,7 @@ void UCombatComponent::InitializeCarriedAmmo()
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_RocketLauncher, StartingRocketAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_Pistol, StartingPistolAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_SubmachineGun, StartingSMGAmmo);
+	CarriedAmmoMap.Emplace(EWeaponType::EWT_Shotgun, StartingShotgunAmmo);
 }
 
 void UCombatComponent::Reload()
@@ -501,6 +501,9 @@ FText UCombatComponent::GetDisplayNameWeaponType() const
 		break;
 	case EWeaponType::EWT_SubmachineGun:
 		WeaponTypeText = FText::FromString("Submachine Gun");
+		break;
+	case EWeaponType::EWT_Shotgun:
+		WeaponTypeText = FText::FromString("Shotgun");
 		break;
 	case EWeaponType::EWT_MAX:
 		WeaponTypeText = FText();

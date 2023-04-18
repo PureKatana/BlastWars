@@ -18,31 +18,40 @@ public:
 
 	virtual void Fire(const FVector& HitTarget) override;
 
-private:
+protected:
 
-	UPROPERTY(EditAnywhere)
-	float Damage = 20.f;
+	FVector TraceEndWithScatter(const FVector& TraceStart, const FVector& HitTarget);
+	void WeaponTraceHit(const FVector& TraceStart, const FVector& HitTarget, FHitResult& OutHit);
 
 	UPROPERTY(EditAnywhere)
 	class UParticleSystem* ImpactParticles;
-
 	UPROPERTY(EditAnywhere)
 	class USoundCue* ImpactSound;
-
 	UPROPERTY(EditAnywhere)
 	class UNiagaraSystem* HitParticles;
-
 	UPROPERTY(EditAnywhere)
 	USoundCue* HitSound;
+	UPROPERTY(EditAnywhere)
+	float Damage = 20.f;
 
+private:
+	
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* BeamParticles;
 
 	// For SMG since it doesn't have a fire animation
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* MuzzleFlash;
-
 	UPROPERTY(EditAnywhere)
 	USoundCue* FireSound;
+
+	// Trace end with scatter
+
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
+	float DistanceToSphere = 800.f;
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
+	float SphereRadius = 75.f;
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
+	bool bUseScatter = false;
 	
 };
