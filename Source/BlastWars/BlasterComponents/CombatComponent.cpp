@@ -166,11 +166,16 @@ void UCombatComponent::InterpFOV(float DeltaTime)
 
 void UCombatComponent::SetAiming(bool bIsAiming)
 {
+	if (!Character || !EquippedWeapon) return;
 	bAiming = bIsAiming;
 	ServerSetAiming(bIsAiming); //RPC invoked from client still runs on the server
 	if (Character)
 	{
 		Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : BaseWalkSpeed;
+	}
+	if (Character->IsLocallyControlled() && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle)
+	{
+		Character->ShowSniperScopeWidget(bIsAiming);
 	}
 }
 
@@ -279,6 +284,7 @@ void UCombatComponent::InitializeCarriedAmmo()
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_Pistol, StartingPistolAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_SubmachineGun, StartingSMGAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_Shotgun, StartingShotgunAmmo);
+	CarriedAmmoMap.Emplace(EWeaponType::EWT_SniperRifle, StartingSniperAmmo);
 }
 
 void UCombatComponent::Reload()
@@ -504,6 +510,9 @@ FText UCombatComponent::GetDisplayNameWeaponType() const
 		break;
 	case EWeaponType::EWT_Shotgun:
 		WeaponTypeText = FText::FromString("Shotgun");
+		break;
+	case EWeaponType::EWT_SniperRifle:
+		WeaponTypeText = FText::FromString("Sniper Rifle");
 		break;
 	case EWeaponType::EWT_MAX:
 		WeaponTypeText = FText();

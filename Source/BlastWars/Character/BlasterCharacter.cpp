@@ -266,6 +266,9 @@ void ABlasterCharacter::PlayReloadMontage()
 		case EWeaponType::EWT_Shotgun:
 			SectionName = FName("AR");
 			break;
+		case EWeaponType::EWT_SniperRifle:
+			SectionName = FName("AR");
+			break;
 		}
 		AnimInstance->Montage_JumpToSection(SectionName);
 	}
@@ -623,6 +626,12 @@ void ABlasterCharacter::MulticastEliminated_Implementation(const FString& Attack
 	if (DeathSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, DeathSound, GetActorLocation());
+	}
+
+	// Sniper Scope Disabled
+	if (IsLocallyControlled() && Combat && Combat->bAiming && Combat->EquippedWeapon && Combat->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle)
+	{
+		ShowSniperScopeWidget(false);
 	}
 }
 
