@@ -207,4 +207,5 @@ public:
 	FORCEINLINE bool IsEliminated() const { return bEliminated; }
 	ECombatState GetCombatState() const;
 	FORCEINLINE UCombatComponent* GetCombat() const { return Combat; }
+	FORCEINLINE UAnimMontage* GetReloadMontage() const { return ReloadMontage; }
 };

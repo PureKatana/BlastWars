@@ -115,6 +115,7 @@ public:
 	FORCEINLINE float GetZoomedFOV() const { return ZoomedFOV; }
 	FORCEINLINE float GetZoomInterpSpeed() const { return ZoomInterpSpeed; }
 	FORCEINLINE bool IsEmpty() { return Ammo <= 0; }
+	FORCEINLINE bool IsFull() { return Ammo == MagCapacity; }
 	FORCEINLINE USoundCue* GetEmptyShotSoundCue() { return EmptyShotSoundCue; }
 	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
 	FORCEINLINE int32 GetAmmo() const { return Ammo; }

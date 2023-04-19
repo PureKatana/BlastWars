@@ -11,6 +11,7 @@
 #include "BulletShell.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "BlastWars/PlayerController/BlasterPlayerController.h"
+#include "BlastWars/BlasterComponents/CombatComponent.h"
 
 // Sets default values
 AWeapon::AWeapon()
@@ -221,6 +222,11 @@ void AWeapon::SpendRound()
 
 void AWeapon::OnRep_Ammo()
 {
+	BlasterOwnerCharacter = !BlasterOwnerCharacter ? Cast<ABlasterCharacter>(GetOwner()) : BlasterOwnerCharacter;
+	if (BlasterOwnerCharacter && BlasterOwnerCharacter->GetCombat() && IsFull())
+	{
+		BlasterOwnerCharacter->GetCombat()->JumpToShotgunEnd();
+	}
 	SetHUDAmmo();
 }
 
