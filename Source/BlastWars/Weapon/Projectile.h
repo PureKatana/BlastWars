@@ -20,38 +20,52 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	void StartDestroyTimer();
+	void DestroyTimerFinished();
+	void SpawnTrailSystem();
+	void ExplodeDamage();
 
 	UFUNCTION()
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastOnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
-
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* CollisionBox;
-
 	UPROPERTY(EditAnywhere)
 	float Damage = 20.f;
-
 	UPROPERTY(EditAnywhere)
 	class UParticleSystem* ImpactParticles;
-
 	UPROPERTY(EditAnywhere)
 	class USoundCue* ImpactSound;
-
 	UPROPERTY(EditAnywhere)
 	class UNiagaraSystem* HitParticles;
-
 	UPROPERTY(EditAnywhere)
 	USoundCue* HitSound;
-
     UPROPERTY(VisibleAnywhere)
 	class UProjectileMovementComponent* ProjectileMovementComponent;
+	UPROPERTY(EditAnywhere)
+	class UNiagaraSystem* TrailSystem;
+	UPROPERTY()
+	class UNiagaraComponent* TrailSystemComponent;
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* ProjectileMesh;
+	UPROPERTY(EditAnywhere)
+	float MinimumDamage = 20.f;
+	UPROPERTY(EditAnywhere)
+	float DamageInRadius = 200.f;
+	UPROPERTY(EditAnywhere)
+	float DamageOutRadius = 500.f;
+
 private:
 
 	UPROPERTY(EditAnywhere)
 	class UParticleSystem* Tracer;
 
 	UParticleSystemComponent* TracerComponent;
+
+	FTimerHandle DestroyOnHitTimer;
+	UPROPERTY(EditAnywhere)
+	float DestroyOnHitTime = 3.f;
 
 public:	
 	
