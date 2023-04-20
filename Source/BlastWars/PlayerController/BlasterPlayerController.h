@@ -25,6 +25,7 @@ public:
 	void SetHUDWeaponType(FText WeaponType);
 	void SetHUDMatchCountdown(float CountdownTime);
 	void SetHUDAnnouncementCountdown(float CountdownTime);
+	void SetHUDGrenades(int32 Grenades);
 	void HideEliminatedText();
 
 	virtual void OnPossess(APawn* InPawn) override;
@@ -92,5 +93,7 @@ private:
 	float HUDMaxHealth;
 	float HUDScore;
 	float HUDDeaths;
+
+	int32 HUDGrenades;
 
 };

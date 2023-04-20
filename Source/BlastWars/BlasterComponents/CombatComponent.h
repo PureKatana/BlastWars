@@ -36,6 +36,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void ThrowGrenadeFinished();
+	UFUNCTION(BlueprintCallable)
+	void LaunchGrenade();
+	UFUNCTION(Server, Reliable)
+	void ServerLaunchGrenade(const FVector_NetQuantize& Target);
 
 protected:
 	// Called when the game starts
@@ -65,6 +69,15 @@ protected:
 	void ThrowGrenade();
 	UFUNCTION(Server, Reliable)
 	void ServerThrowGrenade();
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AProjectile> GrenadeClass;
+
+	void DropEquippedWeapon();
+	void AttachActorToSocket(AActor* ActorToAttach, FName SocketName);
+	void UpdateCarriedAmmo();
+	void PlayEquipWeaponSound();
+	void ReloadEmptyWeapon();
+	void ShowAttachedGrenade(bool bShowGrenade);
 
 private:
 	UPROPERTY()
@@ -149,9 +162,17 @@ private:
 	void UpdateShotgunAmmoValues();
 	FText GetDisplayNameWeaponType() const;
 	
+	UPROPERTY(ReplicatedUsing = OnRep_Grenades)
+	int32 Grenades = 5;
+	UPROPERTY(EditAnywhere)
+	int32 MaxGrenades = 5;
+	UFUNCTION()
+	void OnRep_Grenades();
+	void UpdateHUDGrenades();
 
 public:	
 	
+	FORCEINLINE int32 GetGrenades() const { return Grenades; }
 
 		
 };
