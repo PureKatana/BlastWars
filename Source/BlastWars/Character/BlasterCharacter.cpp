@@ -340,8 +340,16 @@ void ABlasterCharacter::Move(const FInputActionValue& Value)
 void ABlasterCharacter::Look(const FInputActionValue& Value)
 {
 	const FVector2D LookAxesVector = Value.Get<FVector2D>();
-	AddControllerPitchInput(LookAxesVector.Y);
-	AddControllerYawInput(LookAxesVector.X);
+	if (Combat && Combat->EquippedWeapon && Combat->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle && Combat->bAiming)
+	{
+		AddControllerPitchInput(LookAxesVector.Y * MouseSensitivity);
+		AddControllerYawInput(LookAxesVector.X * MouseSensitivity);
+	}
+	else
+	{
+		AddControllerPitchInput(LookAxesVector.Y);
+		AddControllerYawInput(LookAxesVector.X);
+	}
 }
 
 void ABlasterCharacter::Jump()

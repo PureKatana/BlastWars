@@ -202,6 +202,10 @@ private :
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* AttachedGrenade;
 
+	// Mouse sensitivity for sniper
+	UPROPERTY(EditAnywhere)
+	float MouseSensitivity;
+
 public:	
 	void SetOverlappingWeapon(AWeapon* Weapon);
 	bool IsWeaponEquipped();
