@@ -32,8 +32,11 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void ShotgunShellReload();
-
 	void JumpToShotgunEnd();
+
+	UFUNCTION(BlueprintCallable)
+	void ThrowGrenadeFinished();
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -46,23 +49,22 @@ protected:
 	void OnRep_EquippedWeapon();
 
 	void Fire();
-
 	UFUNCTION(Server, Reliable)
 	void ServerFire(const FVector_NetQuantize& TraceHitTarget);
-
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastFire(const FVector_NetQuantize& TraceHitTarget);
 
 	void TraceUnderCrosshair(FHitResult& TraceHitResult);
-
 	void SetHUDCrosshairs(float DeltaTime);
 
 	UFUNCTION(Server, Reliable)
 	void ServerReload();
-
 	void HandleReload();
-
 	int32 AmountToReload();
+
+	void ThrowGrenade();
+	UFUNCTION(Server, Reliable)
+	void ServerThrowGrenade();
 
 private:
 	UPROPERTY()

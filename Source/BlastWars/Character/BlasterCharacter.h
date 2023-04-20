@@ -35,6 +35,7 @@ public:
 	void PlayReloadMontage();
 	void PlayDeathMontage();
 	void PlayHitReactMontage();
+	void PlayThrowGrenadeMontage();
 
 	virtual void OnRep_ReplicatedMovement() override;
 
@@ -74,6 +75,8 @@ protected:
 	UInputAction* FireReleasedAction;
 	UPROPERTY(EditAnywhere, Category = Input)
 	UInputAction* ReloadAction;
+	UPROPERTY(EditAnywhere, Category = Input)
+	UInputAction* ThrowGrenadeAction;
 	void UpdateHUDHealth();
 	void UpdateEliminatedText();
 	void Move(const FInputActionValue& Value);
@@ -89,6 +92,7 @@ protected:
 	void FirePressed();
 	void FireReleased();
 	void ReloadPressed();
+	void ThrowGrenadePressed();
 	UFUNCTION()
 	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
 	// Poll for any relevant classes and initialize HUD
@@ -134,6 +138,9 @@ private :
 	UAnimMontage* HitReactMontage;
 	UPROPERTY(EditAnywhere, Category = Combat)
 	TArray<UAnimMontage*> DeathMontages;
+	UPROPERTY(EditAnywhere, Category = Combat)
+	UAnimMontage* ThrowGrenadeMontage;
+
 
 	void HideCamera();
 
