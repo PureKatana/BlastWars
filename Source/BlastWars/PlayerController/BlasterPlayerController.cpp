@@ -17,12 +17,14 @@
 #include "Components/InputComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "TimerManager.h"
 
 void ABlasterPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
 	BlasterHUD = Cast<ABlasterHUD>(GetHUD());
+	
 	ServerCheckMatchState();
 }
 
@@ -105,6 +107,11 @@ void ABlasterPlayerController::ServerCheckMatchState_Implementation()
 		CooldownTime = GameMode->CooldownTime;
 		MatchState = GameMode->GetMatchState();
 		ClientJoinMidGame(MatchState, WarmupTime, MatchTime, LevelStartingTime, CooldownTime);
+
+		if (BlasterHUD && MatchState == MatchState::WaitingToStart && !BlasterHUD->Announcement)
+		{
+			BlasterHUD->AddAnnouncement();
+		}
 	}
 }
 
@@ -407,6 +414,7 @@ void ABlasterPlayerController::SetHUDMatchCountdown(float CountdownTime)
 
 	if (BlasterHUD && BlasterHUD->CharacterOverlay && BlasterHUD->CharacterOverlay->MatchCountdownText)
 	{
+		
 		if (CountdownTime < 0.f)
 		{
 			BlasterHUD->CharacterOverlay->MatchCountdownText->SetText(FText());

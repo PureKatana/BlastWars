@@ -41,6 +41,8 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerLaunchGrenade(const FVector_NetQuantize& Target);
 
+	void PickupAmmo(EWeaponType WeaponType, int32 AmmoAmount);
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -132,6 +134,8 @@ private:
 	int32 CarriedAmmo;
 	UFUNCTION()
 	void OnRep_CarriedAmmo();
+	UPROPERTY(EditAnywhere)
+	uint32 MaxCarriedAmmo = 400;
 
 	// Replication doesn't work on TMap
 	TMap<EWeaponType, int32> CarriedAmmoMap;
