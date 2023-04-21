@@ -19,7 +19,7 @@ APickup::APickup()
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	OverlapSphere = CreateDefaultSubobject<USphereComponent>(TEXT("Overlap Sphere"));
 	OverlapSphere->SetupAttachment(RootComponent);
-	OverlapSphere->SetSphereRadius(150.f);
+	OverlapSphere->SetSphereRadius(85.f);
 	OverlapSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	OverlapSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	OverlapSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);

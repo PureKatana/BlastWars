@@ -166,7 +166,7 @@ private :
 
 	UPROPERTY(EditAnywhere, Category = "Player Stats")
 	float MaxHealth = 100.f;
-	UPROPERTY(ReplicatedUsing = OnRep_Health, VisibleAnywhere, Category = "Player Stats")
+	UPROPERTY(ReplicatedUsing = OnRep_Health, EditAnywhere, Category = "Player Stats")
 	float Health = 100.f;
 	UFUNCTION()
 	void OnRep_Health(float LastHealth);
@@ -177,8 +177,8 @@ private :
 	// Player Shield
 	UPROPERTY(EditAnywhere, Category = "Player Stats")
 	float MaxShield = 100.f;
-	UPROPERTY(ReplicatedUsing = OnRep_Shield, VisibleAnywhere, Category = "Player Stats")
-	float Shield = 100.f;
+	UPROPERTY(ReplicatedUsing = OnRep_Shield, EditAnywhere, Category = "Player Stats")
+	float Shield = 0.f;
 	UFUNCTION()
 	void OnRep_Shield(float LastShield);
 	
@@ -236,6 +236,8 @@ public:
 	FORCEINLINE void SetHealth(float Amount) { Health = Amount; }
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
 	FORCEINLINE float GetShield() const { return Shield; }
+	FORCEINLINE float GetMaxShield() const { return MaxShield; }
+	FORCEINLINE void SetShield(float Amount) { Shield = Amount; }
 	FORCEINLINE bool IsEliminated() const { return bEliminated; }
 	ECombatState GetCombatState() const;
 	FORCEINLINE UCombatComponent* GetCombat() const { return Combat; }

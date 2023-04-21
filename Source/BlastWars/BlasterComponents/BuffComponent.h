@@ -19,6 +19,7 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void Heal(float HealAmount, float HealingTime);
+	void ReplenishShield(float ShieldAmount, float ReplenishTime);
 	void BuffSpeed(float BuffBaseSpeed, float BuffCrouchSpeed, float BuffTime);
 	void BuffJump(float BuffJumpVelocity, float BuffTime);
 	void SetInitialSpeeds(float BaseSpeed, float CrouchSpeed);
@@ -27,6 +28,7 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 	void HealRampUp(float DeltaTime);
+	void ShieldRampUp(float DeltaTime);
 
 private:
 
@@ -53,6 +55,11 @@ private:
 	float InitialJumpVelocity;
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastJumpBuff(float JumpVelocity);
+
+	// ShieldReplenish
+	bool bReplenishingShield = false;
+	float ReplenishShieldRate = 0.f;
+	float AmountToReplenishShield = 0.f;
 
 public:	
 	
