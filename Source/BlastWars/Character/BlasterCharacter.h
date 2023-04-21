@@ -50,6 +50,8 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void ShowSniperScopeWidget(bool bShowScope);
 
+	void UpdateHUDHealth();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -77,7 +79,7 @@ protected:
 	UInputAction* ReloadAction;
 	UPROPERTY(EditAnywhere, Category = Input)
 	UInputAction* ThrowGrenadeAction;
-	void UpdateHUDHealth();
+	
 	void UpdateEliminatedText();
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
@@ -117,6 +119,9 @@ private :
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UCombatComponent* Combat;
+
+	UPROPERTY(VisibleAnywhere)
+	class UBuffComponent* Buff;
 
 	UFUNCTION(Server, Reliable)
 	void ServerEquipPressed();
@@ -162,7 +167,7 @@ private :
 	UPROPERTY(ReplicatedUsing = OnRep_Health, VisibleAnywhere, Category = "Player Stats")
 	float Health = 100.f;
 	UFUNCTION()
-	void OnRep_Health();
+	void OnRep_Health(float LastHealth);
 	UPROPERTY()
 	ABlasterPlayerController* BlasterPlayerController;
 	bool bEliminated = false;
@@ -218,10 +223,12 @@ public:
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 	FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
 	FORCEINLINE float GetHealth() const { return Health; }
+	FORCEINLINE void SetHealth(float Amount) { Health = Amount; }
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
 	FORCEINLINE bool IsEliminated() const { return bEliminated; }
 	ECombatState GetCombatState() const;
 	FORCEINLINE UCombatComponent* GetCombat() const { return Combat; }
 	FORCEINLINE UAnimMontage* GetReloadMontage() const { return ReloadMontage; }
 	FORCEINLINE UStaticMeshComponent* GetAttachedGrenade() const { return AttachedGrenade; }
+	FORCEINLINE UBuffComponent* GetBuff() const { return Buff; }
 };
