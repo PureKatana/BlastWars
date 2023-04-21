@@ -32,6 +32,10 @@ protected:
 	UPROPERTY(EditAnywhere)
 	USoundCue* HitSound;
 	UPROPERTY(EditAnywhere)
+	UNiagaraSystem* ShieldHitParticles;
+	UPROPERTY(EditAnywhere)
+	USoundCue* ShieldHitSound;
+	UPROPERTY(EditAnywhere)
 	float Damage = 20.f;
 
 private:

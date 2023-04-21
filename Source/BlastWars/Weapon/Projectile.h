@@ -41,6 +41,10 @@ protected:
 	class UNiagaraSystem* HitParticles;
 	UPROPERTY(EditAnywhere)
 	USoundCue* HitSound;
+	UPROPERTY(EditAnywhere)
+	UNiagaraSystem* ShieldHitParticles;
+	UPROPERTY(EditAnywhere)
+	USoundCue* ShieldHitSound;
     UPROPERTY(VisibleAnywhere)
 	class UProjectileMovementComponent* ProjectileMovementComponent;
 	UPROPERTY(EditAnywhere)

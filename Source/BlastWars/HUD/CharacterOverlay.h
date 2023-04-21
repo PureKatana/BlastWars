@@ -45,4 +45,10 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* GrenadeAmount;
 
+	UPROPERTY(meta = (BindWidget))
+    UProgressBar* ShieldBar;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* ShieldText;
+
 };

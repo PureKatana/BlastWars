@@ -39,13 +39,27 @@ void AShotgun::Fire(const FVector& HitTarget)
 				{
 					HitMap.Emplace(BlasterCharacter, 1);
 				}
-				if (HitParticles)
+				if (BlasterCharacter->GetShield() > 0.f)
 				{
-					UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), HitParticles, FireHit.ImpactPoint);
+					if (ShieldHitParticles)
+					{
+						UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ShieldHitParticles, FireHit.ImpactPoint);
+					}
+					if (ShieldHitSound)
+					{
+						UGameplayStatics::PlaySoundAtLocation(this, ShieldHitSound, FireHit.ImpactPoint, 0.5f);
+					}
 				}
-				if (HitSound)
+				else
 				{
-					UGameplayStatics::PlaySoundAtLocation(this, HitSound, FireHit.ImpactPoint, 0.5f);
+					if (HitParticles)
+					{
+						UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), HitParticles, FireHit.ImpactPoint);
+					}
+					if (HitSound)
+					{
+						UGameplayStatics::PlaySoundAtLocation(this, HitSound, FireHit.ImpactPoint, 0.5f);
+					}
 				}
 			}
 			else

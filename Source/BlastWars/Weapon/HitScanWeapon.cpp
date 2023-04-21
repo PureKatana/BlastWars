@@ -30,17 +30,31 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 		ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(FireHit.GetActor());
 		if (BlasterCharacter)
 		{
+			if (BlasterCharacter->GetShield() > 0.f)
+			{
+				if (ShieldHitParticles)
+				{
+					UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ShieldHitParticles, FireHit.ImpactPoint);
+				}
+				if (ShieldHitSound)
+				{
+					UGameplayStatics::PlaySoundAtLocation(this, ShieldHitSound, FireHit.ImpactPoint);
+				}
+			}
+			else
+			{
+				if (HitParticles)
+				{
+					UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), HitParticles, FireHit.ImpactPoint);
+				}
+				if (HitSound)
+				{
+					UGameplayStatics::PlaySoundAtLocation(this, HitSound, FireHit.ImpactPoint);
+				}
+			}
 			if (HasAuthority() && InstigatorController)
 			{
 				UGameplayStatics::ApplyDamage(BlasterCharacter, Damage, InstigatorController, this, UDamageType::StaticClass());
-			}
-			if (HitParticles)
-			{
-				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), HitParticles, FireHit.ImpactPoint);
-			}
-			if (HitSound)
-			{
-				UGameplayStatics::PlaySoundAtLocation(this, HitSound, FireHit.ImpactPoint);
 			}
 		}
 		else

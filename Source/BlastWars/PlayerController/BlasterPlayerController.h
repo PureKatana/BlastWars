@@ -17,6 +17,7 @@ class BLASTWARS_API ABlasterPlayerController : public APlayerController
 public:
 
 	void SetHUDHealth(float Health, float MaxHealth);
+	void SetHUDShield(float Shield, float MaxShield);
 	void SetHUDScore(float Score);
 	void SetHUDDeaths(float Deaths);
 	void SetHUDEliminationText(FString InText);
@@ -87,13 +88,18 @@ private:
 
 	UPROPERTY()
 	class UCharacterOverlay* CharacterOverlay;
-	bool bInitializeCharacterOverlay = false;
+	bool bInitializeHealth = false;
+	bool bInitializeScore = false;
+	bool bInitializeDeaths = false;
+	bool bInitializeGrenades = false;
+	bool bInitializeShield = false;
 
 	float HUDHealth;
 	float HUDMaxHealth;
+	float HUDShield;
+	float HUDMaxShield;
 	float HUDScore;
 	float HUDDeaths;
-
 	int32 HUDGrenades;
 
 };

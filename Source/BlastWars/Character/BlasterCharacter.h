@@ -51,6 +51,8 @@ public:
 	void ShowSniperScopeWidget(bool bShowScope);
 
 	void UpdateHUDHealth();
+	void UpdateHUDShield();
+	void UpdateHUDGrenades();
 
 protected:
 	// Called when the game starts or when spawned
@@ -171,6 +173,14 @@ private :
 	UPROPERTY()
 	ABlasterPlayerController* BlasterPlayerController;
 	bool bEliminated = false;
+
+	// Player Shield
+	UPROPERTY(EditAnywhere, Category = "Player Stats")
+	float MaxShield = 100.f;
+	UPROPERTY(ReplicatedUsing = OnRep_Shield, VisibleAnywhere, Category = "Player Stats")
+	float Shield = 100.f;
+	UFUNCTION()
+	void OnRep_Shield(float LastShield);
 	
 	// Death
 
@@ -225,6 +235,7 @@ public:
 	FORCEINLINE float GetHealth() const { return Health; }
 	FORCEINLINE void SetHealth(float Amount) { Health = Amount; }
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
+	FORCEINLINE float GetShield() const { return Shield; }
 	FORCEINLINE bool IsEliminated() const { return bEliminated; }
 	ECombatState GetCombatState() const;
 	FORCEINLINE UCombatComponent* GetCombat() const { return Combat; }
