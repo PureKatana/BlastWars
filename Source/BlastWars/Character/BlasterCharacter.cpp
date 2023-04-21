@@ -92,10 +92,11 @@ ABlasterCharacter::ABlasterCharacter()
 void ABlasterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	SpawnDefaultWeapon();
 	UpdateHUDHealth();
 	UpdateHUDShield();
 	UpdateHUDGrenades();
+	UpdateHUDAmmo();
 	UpdateEliminatedText();
 	if (HasAuthority())
 	{
@@ -212,6 +213,16 @@ void ABlasterCharacter::UpdateHUDShield()
 	}
 }
 
+void ABlasterCharacter::UpdateHUDAmmo()
+{
+	BlasterPlayerController = !BlasterPlayerController ? Cast<ABlasterPlayerController>(GetController()) : BlasterPlayerController;
+	if (BlasterPlayerController && Combat && Combat->EquippedWeapon)
+	{
+		BlasterPlayerController->SetHUDCarriedAmmo(Combat->CarriedAmmo);
+		BlasterPlayerController->SetHUDWeaponAmmo(Combat->EquippedWeapon->GetAmmo());
+	}
+}
+
 void ABlasterCharacter::UpdateHUDGrenades()
 {
 	BlasterPlayerController = !BlasterPlayerController ? Cast<ABlasterPlayerController>(GetController()) : BlasterPlayerController;
@@ -227,6 +238,21 @@ void ABlasterCharacter::UpdateEliminatedText()
 	if (BlasterPlayerController)
 	{
 		BlasterPlayerController->HideEliminatedText();
+	}
+}
+
+void ABlasterCharacter::SpawnDefaultWeapon()
+{
+	ABlastWarsGameMode* BlastWarsGameMode = Cast<ABlastWarsGameMode>(UGameplayStatics::GetGameMode(this));
+	UWorld* World = GetWorld();
+	if (BlastWarsGameMode && World && !bEliminated && DefaultWeaponClass)
+	{
+		AWeapon* StartingWeapon = World->SpawnActor<AWeapon>(DefaultWeaponClass);
+		StartingWeapon->bDestroyWeapon = true;
+		if (Combat)
+		{
+			Combat->EquipWeapon(StartingWeapon);
+		}
 	}
 }
 
@@ -658,7 +684,14 @@ void ABlasterCharacter::Eliminated(ABlasterPlayerController* AttackController)
 {
 	if (IsWeaponEquipped())
 	{
-		Combat->EquippedWeapon->Dropped();
+		if (Combat->EquippedWeapon->bDestroyWeapon)
+		{
+			Combat->EquippedWeapon->Destroy();
+		}
+		else
+		{
+			Combat->EquippedWeapon->Dropped();
+		}
 	}
 	
 	FString AttackerName = "";

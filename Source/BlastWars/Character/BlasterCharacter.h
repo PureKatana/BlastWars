@@ -52,7 +52,10 @@ public:
 
 	void UpdateHUDHealth();
 	void UpdateHUDShield();
+	void UpdateHUDAmmo();
 	void UpdateHUDGrenades();
+
+	void SpawnDefaultWeapon();
 
 protected:
 	// Called when the game starts or when spawned
@@ -220,6 +223,11 @@ private :
 	// Mouse sensitivity for sniper
 	UPROPERTY(EditAnywhere)
 	float MouseSensitivity;
+
+	// Default Weapon
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AWeapon> DefaultWeaponClass;
 
 public:	
 	void SetOverlappingWeapon(AWeapon* Weapon);
