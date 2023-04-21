@@ -16,6 +16,7 @@
 #include "Sound/SoundCue.h"
 #include "BlastWars/Character/BlasterAnimInstance.h"
 #include "BlastWars/Weapon/Projectile.h"
+#include "BuffComponent.h"
 
 // Sets default values for this component's properties
 UCombatComponent::UCombatComponent()
@@ -172,7 +173,7 @@ void UCombatComponent::SetAiming(bool bIsAiming)
 	if (!Character || !EquippedWeapon) return;
 	bAiming = bIsAiming;
 	ServerSetAiming(bIsAiming); //RPC invoked from client still runs on the server
-	if (Character)
+	if (Character && !Character->GetBuff()->HasSpeedBuff())
 	{
 		Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : BaseWalkSpeed;
 	}
@@ -185,7 +186,7 @@ void UCombatComponent::SetAiming(bool bIsAiming)
 void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
 {
 	bAiming = bIsAiming;
-	if (Character)
+	if (Character && !Character->GetBuff()->HasSpeedBuff())
 	{
 		Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : BaseWalkSpeed;
 	}
