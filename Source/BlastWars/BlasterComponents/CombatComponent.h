@@ -43,6 +43,7 @@ public:
 	void ServerLaunchGrenade(const FVector_NetQuantize& Target);
 
 	void PickupAmmo(EWeaponType WeaponType, int32 AmmoAmount);
+	void PickupGrenades(int32 GrenadeAmount);
 
 protected:
 	// Called when the game starts
@@ -175,9 +176,9 @@ private:
 	FText GetDisplayNameWeaponType() const;
 	
 	UPROPERTY(ReplicatedUsing = OnRep_Grenades)
-	int32 Grenades = 5;
+	int32 Grenades = 6;
 	UPROPERTY(EditAnywhere)
-	int32 MaxGrenades = 5;
+	int32 MaxGrenades = 6;
 	UFUNCTION()
 	void OnRep_Grenades();
 	void UpdateHUDGrenades();

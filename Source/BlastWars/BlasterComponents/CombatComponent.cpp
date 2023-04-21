@@ -821,4 +821,10 @@ void UCombatComponent::PickupAmmo(EWeaponType WeaponType, int32 AmmoAmount)
 	}
 }
 
+void UCombatComponent::PickupGrenades(int32 GrenadeAmount)
+{
+	Grenades = FMath::Clamp(Grenades + GrenadeAmount, 0, MaxGrenades);
+	UpdateHUDGrenades();
+}
+
 
