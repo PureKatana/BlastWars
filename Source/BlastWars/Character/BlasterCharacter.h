@@ -105,6 +105,7 @@ protected:
 	// Poll for any relevant classes and initialize HUD
 	void PollInitialize();
 	void RotateInPlace(float DeltaTime);
+	void DropOrDestroyWeapon(AWeapon* Weapon);
 private :
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	class USpringArmComponent* CameraBoom;

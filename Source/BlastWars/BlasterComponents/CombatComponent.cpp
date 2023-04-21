@@ -57,6 +57,7 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(UCombatComponent, EquippedWeapon);
+	DOREPLIFETIME(UCombatComponent, SecondaryWeapon);
 	DOREPLIFETIME(UCombatComponent, bAiming);
 	DOREPLIFETIME_CONDITION(UCombatComponent, CarriedAmmo, COND_OwnerOnly);
 	DOREPLIFETIME(UCombatComponent, CombatState);
@@ -450,7 +451,33 @@ void UCombatComponent::OnRep_EquippedWeapon()
 		AttachActorToSocket(EquippedWeapon, FName("RightHandSocket"));
 		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 		Character->bUseControllerRotationYaw = true;
-		PlayEquipWeaponSound();
+		PlayEquipWeaponSound(EquippedWeapon);
+		EquippedWeapon->SetHUDAmmo();
+		if (Controller)
+		{
+			Controller->SetHUDWeaponType(GetDisplayNameWeaponType());
+		}
+	}
+}
+
+void UCombatComponent::OnRep_SecondaryWeapon()
+{
+	if (SecondaryWeapon && Character)
+	{
+		SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
+		PlayEquipWeaponSound(SecondaryWeapon);
+		if (SecondaryWeapon->GetWeaponType() == EWeaponType::EWT_RocketLauncher)
+		{
+			AttachActorToSocket(SecondaryWeapon, FName("RocketBackpackSocket"));
+		}
+		else if (SecondaryWeapon->GetWeaponType() == EWeaponType::EWT_Pistol || SecondaryWeapon->GetWeaponType() == EWeaponType::EWT_SubmachineGun)
+		{
+			AttachActorToSocket(SecondaryWeapon, FName("PistolBackpackSocket"));
+		}
+		else
+		{
+			AttachActorToSocket(SecondaryWeapon, FName("BackpackSocket"));
+		}
 
 		if (Controller)
 		{
@@ -463,7 +490,51 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 {
 	if (!Character || !WeaponToEquip) return;
 	if (CombatState != ECombatState::ECS_Unoccupied) return;
+	if (EquippedWeapon && !SecondaryWeapon)
+	{
+		EquipSecondaryWeapon(WeaponToEquip);
+	}
+	else
+	{
+		EquipPrimaryWeapon(WeaponToEquip);
+	}
+	
+	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
+	Character->bUseControllerRotationYaw = true;
+}
 
+void UCombatComponent::SwapWeapon()
+{
+	if (bAiming || CombatState != ECombatState::ECS_Unoccupied) return;
+	AWeapon* TempWeapon = EquippedWeapon;
+	EquippedWeapon = SecondaryWeapon;
+	SecondaryWeapon = TempWeapon;
+
+	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+	AttachActorToSocket(EquippedWeapon, FName("RightHandSocket"));
+	EquippedWeapon->SetHUDAmmo();
+	UpdateCarriedAmmo();
+	PlayEquipWeaponSound(EquippedWeapon);
+	ReloadEmptyWeapon();
+
+	SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
+	if (SecondaryWeapon->GetWeaponType() == EWeaponType::EWT_RocketLauncher)
+	{
+		AttachActorToSocket(SecondaryWeapon, FName("RocketBackpackSocket"));
+	}
+	else if (SecondaryWeapon->GetWeaponType() == EWeaponType::EWT_Pistol || SecondaryWeapon->GetWeaponType() == EWeaponType::EWT_SubmachineGun)
+	{
+		AttachActorToSocket(SecondaryWeapon, FName("PistolBackpackSocket"));
+	}
+	else
+	{
+		AttachActorToSocket(SecondaryWeapon, FName("BackpackSocket"));
+	}
+}
+
+void UCombatComponent::EquipPrimaryWeapon(AWeapon* WeaponToEquip)
+{
+	if (!WeaponToEquip) return;
 	DropEquippedWeapon();
 	EquippedWeapon = WeaponToEquip;
 	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
@@ -472,11 +543,29 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	EquippedWeapon->SetOwner(Character);
 	EquippedWeapon->SetHUDAmmo();
 	UpdateCarriedAmmo();
-	PlayEquipWeaponSound();
+	PlayEquipWeaponSound(WeaponToEquip);
 	ReloadEmptyWeapon();
+}
 
-	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
-	Character->bUseControllerRotationYaw = true;
+void UCombatComponent::EquipSecondaryWeapon(AWeapon* WeaponToEquip)
+{
+	if (!WeaponToEquip) return;
+	SecondaryWeapon = WeaponToEquip;
+	SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
+	PlayEquipWeaponSound(WeaponToEquip);
+	if (SecondaryWeapon->GetWeaponType() == EWeaponType::EWT_RocketLauncher)
+	{
+		AttachActorToSocket(WeaponToEquip, FName("RocketBackpackSocket"));
+	}
+	else if (SecondaryWeapon->GetWeaponType() == EWeaponType::EWT_Pistol || SecondaryWeapon->GetWeaponType() == EWeaponType::EWT_SubmachineGun)
+	{
+		AttachActorToSocket(WeaponToEquip, FName("PistolBackpackSocket"));
+	}
+	else
+	{
+		AttachActorToSocket(WeaponToEquip, FName("BackpackSocket"));
+	}
+	SecondaryWeapon->SetOwner(Character);
 }
 
 void UCombatComponent::DropEquippedWeapon()
@@ -489,11 +578,11 @@ void UCombatComponent::DropEquippedWeapon()
 
 void UCombatComponent::AttachActorToSocket(AActor* ActorToAttach, FName SocketName)
 {
-	if (!Character || !ActorToAttach || !Character->GetMesh() || !EquippedWeapon) return;
-	const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(SocketName);
-	if (HandSocket)
+	if (!Character || !ActorToAttach || !Character->GetMesh()) return;
+	const USkeletalMeshSocket* Socket = Character->GetMesh()->GetSocketByName(SocketName);
+	if (Socket)
 	{
-		HandSocket->AttachActor(ActorToAttach, Character->GetMesh());
+		Socket->AttachActor(ActorToAttach, Character->GetMesh());
 	}
 }
 
@@ -512,11 +601,11 @@ void UCombatComponent::UpdateCarriedAmmo()
 	}
 }
 
-void UCombatComponent::PlayEquipWeaponSound()
+void UCombatComponent::PlayEquipWeaponSound(AWeapon* WeaponToEquip)
 {
-	if (Character && EquippedWeapon && EquippedWeapon->EquipSound)
+	if (Character && WeaponToEquip && WeaponToEquip->EquipSound)
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, EquippedWeapon->EquipSound, Character->GetActorLocation());
+		UGameplayStatics::PlaySoundAtLocation(this, WeaponToEquip->EquipSound, Character->GetActorLocation());
 	}
 }
 
@@ -712,6 +801,11 @@ void UCombatComponent::UpdateHUDGrenades()
 	{
 		Controller->SetHUDGrenades(Grenades);
 	}
+}
+
+bool UCombatComponent::ShouldSwapWeapon()
+{
+	return (EquippedWeapon && SecondaryWeapon);
 }
 
 void UCombatComponent::PickupAmmo(EWeaponType WeaponType, int32 AmmoAmount)

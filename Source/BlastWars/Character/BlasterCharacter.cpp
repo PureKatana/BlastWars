@@ -437,16 +437,7 @@ void ABlasterCharacter::EquipPressed()
 	if (bDisableGameplay) return;
 	if (Combat)
 	{
-		//Equip weapon if you are the server
-		if (HasAuthority())
-		{
-			Combat->EquipWeapon(OverlappingWeapon);
-		}
-		//Equip weapon if you are a client by sending a RPC (Remote Procedural Call) that executes this code to another machine
-		else
-		{
-			ServerEquipPressed();
-		}
+		ServerEquipPressed();
 	}
 }
 
@@ -454,7 +445,14 @@ void ABlasterCharacter::ServerEquipPressed_Implementation()
 {
 	if (Combat)
 	{
-		Combat->EquipWeapon(OverlappingWeapon);
+		if (OverlappingWeapon)
+		{
+			Combat->EquipWeapon(OverlappingWeapon);
+		}
+		else if(Combat->ShouldSwapWeapon())
+		{
+			Combat->SwapWeapon();
+		}
 	}
 }
 
@@ -680,20 +678,32 @@ void ABlasterCharacter::TurnInPlace(float DeltaTime)
 	}
 }
 
+void ABlasterCharacter::DropOrDestroyWeapon(AWeapon* Weapon)
+{
+	if (!Weapon) return;
+	if (Weapon->bDestroyWeapon)
+	{
+		Weapon->Destroy();
+	}
+	else
+	{
+		Weapon->Dropped();
+	}
+}
+
 void ABlasterCharacter::Eliminated(ABlasterPlayerController* AttackController)
 {
-	if (IsWeaponEquipped())
+	if (Combat)
 	{
-		if (Combat->EquippedWeapon->bDestroyWeapon)
+		if (Combat->EquippedWeapon)
 		{
-			Combat->EquippedWeapon->Destroy();
+			DropOrDestroyWeapon(Combat->EquippedWeapon);
 		}
-		else
+		if (Combat->SecondaryWeapon)
 		{
-			Combat->EquippedWeapon->Dropped();
+			DropOrDestroyWeapon(Combat->SecondaryWeapon);
 		}
 	}
-	
 	FString AttackerName = "";
 	ABlasterPlayerController* AttackerBlasterController = AttackController;
 	BlasterPlayerController = !BlasterPlayerController ? Cast<ABlasterPlayerController>(GetController()) : BlasterPlayerController;
