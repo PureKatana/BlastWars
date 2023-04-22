@@ -8,10 +8,11 @@
 #include "Sound/SoundCue.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "BlastWars/Character/BlasterCharacter.h"
+#include "Kismet/KismetMathLibrary.h"
 
-void AShotgun::Fire(const FVector& HitTarget)
+void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 {
-	AWeapon::Fire(HitTarget);
+	AWeapon::Fire(FVector());
 	APawn* OwnerPawn = Cast<APawn>(GetOwner());
 	if (!OwnerPawn) return;
 	AController* InstigatorController = OwnerPawn->GetController();
@@ -19,17 +20,18 @@ void AShotgun::Fire(const FVector& HitTarget)
 	const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName("MuzzleFlash");
 	if (MuzzleFlashSocket)
 	{
-		FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
-		FVector Start = SocketTransform.GetLocation();
+		const FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
+		const FVector Start = SocketTransform.GetLocation();
 
+		// Maps hit character to the number of times hit
 		TMap<ABlasterCharacter*, uint32> HitMap;
-		for (uint32 i = 0; i < NumberOfShots; i++)
+		for (FVector_NetQuantize HitTarget : HitTargets)
 		{
 			FHitResult FireHit;
 			WeaponTraceHit(Start, HitTarget, FireHit);
 
 			ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(FireHit.GetActor());
-			if (BlasterCharacter)
+			if (BlasterCharacter && HasAuthority() && InstigatorController)
 			{
 				if (HitMap.Contains(BlasterCharacter))
 				{
@@ -74,15 +76,36 @@ void AShotgun::Fire(const FVector& HitTarget)
 				}
 			}
 		}
-
 		for (auto HitPair : HitMap)
 		{
 			if (HitPair.Key && HasAuthority() && InstigatorController)
 			{
+				// Multiply Damage by the number of times hit (value) to the character hit (key)
 				UGameplayStatics::ApplyDamage(HitPair.Key, Damage * HitPair.Value, InstigatorController, this, UDamageType::StaticClass());
 			}
 		}
+	}
+}
 
+void AShotgun::ShotgunTraceEndWithScatter(const FVector& HitTarget, TArray<FVector_NetQuantize>& HitTargets)
+{
+	const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName("MuzzleFlash");
+	if (!MuzzleFlashSocket) return;
+
+	const FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
+	const FVector Start = SocketTransform.GetLocation();
+
+	const FVector ToTargetNormalized = (HitTarget - Start).GetSafeNormal();
+	const FVector SphereCenter = Start + ToTargetNormalized * DistanceToSphere;
+
+	for (uint32 i = 0; i < NumberOfShots; i++)
+	{
+		const FVector RandomVector = UKismetMathLibrary::RandomUnitVector() * FMath::FRandRange(0.f, SphereRadius);
+		const FVector EndLocation = SphereCenter + RandomVector;
+		FVector ToEndLocation = EndLocation - Start;
+		ToEndLocation = FVector(Start + ToEndLocation * TRACE_LENGTH / ToEndLocation.Size());
+
+		HitTargets.Add(ToEndLocation);
 	}
 }
 
