@@ -45,6 +45,8 @@ public:
 	void PickupAmmo(EWeaponType WeaponType, int32 AmmoAmount);
 	void PickupGrenades(int32 GrenadeAmount);
 
+	bool bLocallyReloading = false;
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -108,8 +110,11 @@ private:
     AWeapon* EquippedWeapon;
 	UPROPERTY(ReplicatedUsing = OnRep_SecondaryWeapon)
 	AWeapon* SecondaryWeapon;
-	UPROPERTY(Replicated)
-	bool bAiming;
+	UPROPERTY(ReplicatedUsing = OnRep_Aiming)
+	bool bAiming = false;
+	bool bAimPressed = false;
+	UFUNCTION()
+	void OnRep_Aiming();
 	UPROPERTY(EditAnywhere)
 	float BaseWalkSpeed;
 	UPROPERTY(EditAnywhere)
