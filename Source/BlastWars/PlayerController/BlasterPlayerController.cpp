@@ -109,7 +109,7 @@ void ABlasterPlayerController::HighPingWarning()
 	if (BlasterHUD && BlasterHUD->CharacterOverlay && BlasterHUD->CharacterOverlay->HighPingImage && BlasterHUD->CharacterOverlay->HighPingAnimation)
 	{
 		BlasterHUD->CharacterOverlay->HighPingImage->SetOpacity(1.f);
-		BlasterHUD->CharacterOverlay->PlayAnimation(BlasterHUD->CharacterOverlay->HighPingAnimation);
+		BlasterHUD->CharacterOverlay->PlayAnimation(BlasterHUD->CharacterOverlay->HighPingAnimation, 0.f, 5);
 	}
 }
 
