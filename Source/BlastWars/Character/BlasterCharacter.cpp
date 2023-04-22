@@ -27,6 +27,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Components/BoxComponent.h"
+#include "BlastWars/BlasterComponents/LagCompensationComponent.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -60,6 +61,9 @@ ABlasterCharacter::ABlasterCharacter()
 	// Set the buff component
 	Buff = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
 	Buff->SetIsReplicated(true);
+
+	// Set the lag compensation component
+	LagCompensation = CreateDefaultSubobject<ULagCompensationComponent>(TEXT("LagCompensationComponent"));
 
 	// Set the crouching bool to true from the character movement
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
@@ -360,6 +364,14 @@ void ABlasterCharacter::PostInitializeComponents()
 		Buff->Character = this;
 		Buff->SetInitialSpeeds(GetCharacterMovement()->MaxWalkSpeed, GetCharacterMovement()->MaxWalkSpeedCrouched);
 		Buff->SetInitialJumpVelocity(GetCharacterMovement()->JumpZVelocity);
+	}
+	if (LagCompensation)
+	{
+		LagCompensation->Character = this;
+		if (Controller)
+		{
+			LagCompensation->Controller = Cast<ABlasterPlayerController>(Controller);
+		}
 	}
 }
 

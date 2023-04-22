@@ -168,6 +168,9 @@ private :
 	UPROPERTY(VisibleAnywhere)
 	class UBuffComponent* Buff;
 
+	UPROPERTY(VisibleAnywhere)
+	class ULagCompensationComponent* LagCompensation;
+
 	UFUNCTION(Server, Reliable)
 	void ServerEquipPressed();
 
