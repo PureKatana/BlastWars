@@ -41,11 +41,13 @@ public:
 	friend class ABlasterCharacter;
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	void ShowFramePackage(const FFramePackage& Package, const FColor& Color);
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+	void SaveFramePackage(FFramePackage& Package);
 private:
 
 	UPROPERTY()
