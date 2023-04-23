@@ -9,6 +9,8 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "BlastWars/Character/BlasterCharacter.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "BlastWars/PlayerController/BlasterPlayerController.h"
+#include "BlastWars/BlasterComponents/LagCompensationComponent.h"
 
 void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 {
@@ -33,16 +35,13 @@ void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 			ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(FireHit.GetActor());
 			if (BlasterCharacter)
 			{
-				if (HasAuthority() && InstigatorController)
+				if (HitMap.Contains(BlasterCharacter))
 				{
-					if (HitMap.Contains(BlasterCharacter))
-					{
-						HitMap[BlasterCharacter]++;
-					}
-					else
-					{
-						HitMap.Emplace(BlasterCharacter, 1);
-					}
+					HitMap[BlasterCharacter]++;
+				}
+				else
+				{
+					HitMap.Emplace(BlasterCharacter, 1);
 				}
 				if (BlasterCharacter->GetShield() > 0.f)
 				{
@@ -79,12 +78,27 @@ void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 				}
 			}
 		}
+		TArray<ABlasterCharacter*> HitCharacters;
 		for (auto HitPair : HitMap)
 		{
-			if (HitPair.Key && HasAuthority() && InstigatorController)
+			if (HitPair.Key && InstigatorController)
 			{
-				// Multiply Damage by the number of times hit (value) to the character hit (key)
-				UGameplayStatics::ApplyDamage(HitPair.Key, Damage * HitPair.Value, InstigatorController, this, UDamageType::StaticClass());
+				if (HasAuthority() && !bUseServerSideRewind)
+				{
+					// Multiply Damage by the number of times hit (value) to the character hit (key)
+					UGameplayStatics::ApplyDamage(HitPair.Key, Damage * HitPair.Value, InstigatorController, this, UDamageType::StaticClass());
+				}
+				HitCharacters.Add(HitPair.Key);
+			}
+		}
+		if (!HasAuthority() && bUseServerSideRewind)
+		{
+			BlasterOwnerCharacter = !BlasterOwnerCharacter ? Cast<ABlasterCharacter>(OwnerPawn) : BlasterOwnerCharacter;
+			BlasterOwnerController = !BlasterOwnerController ? Cast<ABlasterPlayerController>(InstigatorController) : BlasterOwnerController;
+
+			if (BlasterOwnerController && BlasterOwnerCharacter && BlasterOwnerCharacter->GetLagCompensation() && BlasterOwnerCharacter->IsLocallyControlled())
+			{
+				BlasterOwnerCharacter->GetLagCompensation()->ShotgunServerScoreRequest(HitCharacters, Start, HitTargets, BlasterOwnerController->GetServerTime() - BlasterOwnerController->SingleTripTime);
 			}
 		}
 	}
