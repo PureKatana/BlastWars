@@ -10,6 +10,8 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "DrawDebugHelpers.h"
 #include "BlastWars/Types/WeaponTypes.h"
+#include "BlastWars/BlasterComponents/LagCompensationComponent.h"
+#include "BlastWars/PlayerController/BlasterPlayerController.h"
 
 void AHitScanWeapon::Fire(const FVector& HitTarget)
 {
@@ -51,9 +53,22 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 					UGameplayStatics::PlaySoundAtLocation(this, HitSound, FireHit.ImpactPoint);
 				}
 			}
-			if (HasAuthority() && InstigatorController)
+			if (InstigatorController)
 			{
-				UGameplayStatics::ApplyDamage(BlasterCharacter, Damage, InstigatorController, this, UDamageType::StaticClass());
+				if (HasAuthority() && !bUseServerSideRewind)
+				{
+					UGameplayStatics::ApplyDamage(BlasterCharacter, Damage, InstigatorController, this, UDamageType::StaticClass());
+				}
+				if(!HasAuthority() && bUseServerSideRewind)
+				{
+					BlasterOwnerCharacter = !BlasterOwnerCharacter ? Cast<ABlasterCharacter>(OwnerPawn) : BlasterOwnerCharacter;
+					BlasterOwnerController = !BlasterOwnerController ? Cast<ABlasterPlayerController>(InstigatorController) : BlasterOwnerController;
+
+					if (BlasterOwnerController && BlasterOwnerCharacter && BlasterOwnerCharacter->GetLagCompensation())
+					{
+						BlasterOwnerCharacter->GetLagCompensation()->ServerScoreRequest(BlasterCharacter, Start, HitTarget, BlasterOwnerController->GetServerTime() - BlasterOwnerController->SingleTripTime, this);
+					}
+				}
 			}
 		}
 		else
@@ -90,7 +105,7 @@ void AHitScanWeapon::WeaponTraceHit(const FVector& TraceStart, const FVector& Hi
 		{
 			EndBeam = OutHit.ImpactPoint;
 		}
-		//DrawDebugSphere(GetWorld(), EndBeam, 16.f, 12, FColor::Orange, true);
+		DrawDebugSphere(GetWorld(), EndBeam, 16.f, 12, FColor::Orange, true);
 		if (BeamParticles)
 		{
 			UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(World, BeamParticles, TraceStart, FRotator::ZeroRotator, true);

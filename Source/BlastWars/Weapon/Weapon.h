@@ -108,6 +108,14 @@ protected:
 	float DistanceToSphere = 800.f;
 	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
 	float SphereRadius = 75.f;
+	UPROPERTY(EditAnywhere)
+	float Damage = 20.f;
+	UPROPERTY(EditAnywhere)
+	bool bUseServerSideRewind = false;
+	UPROPERTY()
+	class ABlasterCharacter* BlasterOwnerCharacter;
+	UPROPERTY()
+	class ABlasterPlayerController* BlasterOwnerController;
 
 private:
 
@@ -125,10 +133,6 @@ private:
 	class UAnimationAsset* FireAnimation;
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class ABulletShell> BulletShellClass;
-	UPROPERTY()
-	class ABlasterCharacter* BlasterOwnerCharacter;
-	UPROPERTY()
-	class ABlasterPlayerController* BlasterOwnerController;
 	UPROPERTY(EditAnywhere)
 	class USoundCue* EmptyShotSoundCue;
 	UPROPERTY(EditAnywhere)
@@ -157,4 +161,5 @@ public:
 	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
 	FORCEINLINE int32 GetAmmo() const { return Ammo; }
 	FORCEINLINE int32 GetMagCapacity() const { return MagCapacity; }
+	FORCEINLINE float GetDamage() const { return Damage; }
 };

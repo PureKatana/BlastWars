@@ -39,6 +39,9 @@ public:
 	void HandleMatchHasStarted();
 	void HandleCooldown();
 	virtual void SetupInputComponent() override;
+
+	float SingleTripTime = 0.f;
+
 protected:
 
 	virtual void BeginPlay() override;
