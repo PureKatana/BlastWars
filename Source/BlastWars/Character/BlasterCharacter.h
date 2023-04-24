@@ -36,6 +36,7 @@ public:
 	void PlayDeathMontage();
 	void PlayHitReactMontage();
 	void PlayThrowGrenadeMontage();
+	void PlaySwapMontage();
 
 	virtual void OnRep_ReplicatedMovement() override;
 
@@ -59,6 +60,8 @@ public:
 
 	UPROPERTY()
 	TMap<FName, class UBoxComponent*> HitCollisionBoxes;
+
+	bool bFinishedSwapping = false;
 
 protected:
 	// Called when the game starts or when spawned
@@ -157,6 +160,8 @@ private :
 	TArray<UAnimMontage*> DeathMontages;
 	UPROPERTY(EditAnywhere, Category = Combat)
 	UAnimMontage* ThrowGrenadeMontage;
+	UPROPERTY(EditAnywhere, Category = Combat)
+	UAnimMontage* SwapMontage;
 
 
 	void HideCamera();

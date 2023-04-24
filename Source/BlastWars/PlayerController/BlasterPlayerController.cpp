@@ -135,7 +135,6 @@ void ABlasterPlayerController::CheckPing(float DeltaTime)
 		PlayerState = !PlayerState ? GetPlayerState<APlayerState>() : PlayerState;
 		if (PlayerState)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("%d"), PlayerState->GetPing() * 4)
 			// UE compresses the ping by dividing it by 4 so we have to multiply it by 4 to get the true ping
 			if (PlayerState->GetPing() * 4 > HighPingThreshold)
 			{

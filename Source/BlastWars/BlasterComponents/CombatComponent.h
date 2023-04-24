@@ -28,6 +28,10 @@ public:
 	void Reload();
 	UFUNCTION(Blueprintcallable)
 	void FinishedReloading();
+	UFUNCTION(Blueprintcallable)
+	void FinishedSwap();
+	UFUNCTION(Blueprintcallable)
+	void FinishedSwapAttachWeapons();
 
 	void FirePressed(bool bPressed);
 

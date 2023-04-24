@@ -216,8 +216,8 @@ void UCombatComponent::FirePressed(bool bPressed)
 bool UCombatComponent::CanFire()
 {
 	if (!EquippedWeapon) return false;
-	if (bLocallyReloading) return false;
 	if (!EquippedWeapon->IsEmpty() && bCanFire && CombatState == ECombatState::ECS_Reloading && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun) return true;
+	if (bLocallyReloading) return false;
 	return !EquippedWeapon->IsEmpty() && bCanFire && CombatState == ECombatState::ECS_Unoccupied;
 }
 
@@ -442,6 +442,49 @@ void UCombatComponent::FinishedReloading()
 	}
 }
 
+void UCombatComponent::FinishedSwap()
+{
+	if (Character && Character->HasAuthority())
+	{
+		CombatState = ECombatState::ECS_Unoccupied;
+	}
+	if (Character)
+	{
+		Character->bFinishedSwapping = true;
+	}
+	if (SecondaryWeapon)
+	{
+		SecondaryWeapon->EnableCustomDepth(true);
+	}
+}
+
+void UCombatComponent::FinishedSwapAttachWeapons()
+{
+	AWeapon* TempWeapon = EquippedWeapon;
+	EquippedWeapon = SecondaryWeapon;
+	SecondaryWeapon = TempWeapon;
+	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+	AttachActorToSocket(EquippedWeapon, FName("RightHandSocket"));
+	EquippedWeapon->SetHUDAmmo();
+	UpdateCarriedAmmo();
+	PlayEquipWeaponSound(EquippedWeapon);
+	ReloadEmptyWeapon();
+
+	SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
+	if (SecondaryWeapon->GetWeaponType() == EWeaponType::EWT_RocketLauncher)
+	{
+		AttachActorToSocket(SecondaryWeapon, FName("RocketBackpackSocket"));
+	}
+	else if (SecondaryWeapon->GetWeaponType() == EWeaponType::EWT_Pistol || SecondaryWeapon->GetWeaponType() == EWeaponType::EWT_SubmachineGun)
+	{
+		AttachActorToSocket(SecondaryWeapon, FName("PistolBackpackSocket"));
+	}
+	else
+	{
+		AttachActorToSocket(SecondaryWeapon, FName("BackpackSocket"));
+	}
+}
+
 void UCombatComponent::UpdateAmmoValues()
 {
 	if (!EquippedWeapon || !Character) return;
@@ -521,6 +564,12 @@ void UCombatComponent::OnRep_CombatState()
 			ShowAttachedGrenade(true);
 		}
 		break;
+	case ECombatState::ECS_SwappingWeapons:
+		if (Character && !Character->IsLocallyControlled())
+		{
+			Character->PlaySwapMontage();
+		}
+		break;
 	}
 }
 
@@ -586,30 +635,15 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 
 void UCombatComponent::SwapWeapon()
 {
-	if (bAiming || CombatState != ECombatState::ECS_Unoccupied) return;
-	AWeapon* TempWeapon = EquippedWeapon;
-	EquippedWeapon = SecondaryWeapon;
-	SecondaryWeapon = TempWeapon;
+	if (bAiming || CombatState != ECombatState::ECS_Unoccupied || !Character) return;
 
-	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
-	AttachActorToSocket(EquippedWeapon, FName("RightHandSocket"));
-	EquippedWeapon->SetHUDAmmo();
-	UpdateCarriedAmmo();
-	PlayEquipWeaponSound(EquippedWeapon);
-	ReloadEmptyWeapon();
+	Character->PlaySwapMontage();
+	Character->bFinishedSwapping = false;
+	CombatState = ECombatState::ECS_SwappingWeapons;
 
-	SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
-	if (SecondaryWeapon->GetWeaponType() == EWeaponType::EWT_RocketLauncher)
+	if (SecondaryWeapon)
 	{
-		AttachActorToSocket(SecondaryWeapon, FName("RocketBackpackSocket"));
-	}
-	else if (SecondaryWeapon->GetWeaponType() == EWeaponType::EWT_Pistol || SecondaryWeapon->GetWeaponType() == EWeaponType::EWT_SubmachineGun)
-	{
-		AttachActorToSocket(SecondaryWeapon, FName("PistolBackpackSocket"));
-	}
-	else
-	{
-		AttachActorToSocket(SecondaryWeapon, FName("BackpackSocket"));
+		SecondaryWeapon->EnableCustomDepth(false);
 	}
 }
 
