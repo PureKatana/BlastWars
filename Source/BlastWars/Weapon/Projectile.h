@@ -17,6 +17,16 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	// Use with server side rewind
+	bool bUseServerSideRewind = false;
+	FVector_NetQuantize TraceStart;
+	// 2 decimal place of precision
+	FVector_NetQuantize100 InitialVelocity;
+	UPROPERTY(EditAnywhere)
+	float InitialSpeed = 15000.f;
+
+	float Damage = 20.f;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -31,8 +41,6 @@ protected:
 	void MulticastOnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* CollisionBox;
-	UPROPERTY(EditAnywhere)
-	float Damage = 20.f;
 	UPROPERTY(EditAnywhere)
 	class UParticleSystem* ImpactParticles;
 	UPROPERTY(EditAnywhere)
