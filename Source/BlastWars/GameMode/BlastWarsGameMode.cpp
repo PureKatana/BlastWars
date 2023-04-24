@@ -76,13 +76,35 @@ void ABlastWarsGameMode::PlayerEliminated(ABlasterCharacter* EliminatedCharacter
 	ABlasterPlayerState* AttackerPlayerState = AttackerController ? Cast<ABlasterPlayerState>(AttackerController->PlayerState) : nullptr;
 	ABlasterPlayerState* VictimPlayerState = VictimController ? Cast<ABlasterPlayerState>(VictimController->PlayerState) : nullptr;
 	ABlastWarsGameState* BlastWarsGameState = GetGameState<ABlastWarsGameState>();
-	if (AttackerPlayerState && AttackerPlayerState != VictimPlayerState)
+	if (AttackerPlayerState && AttackerPlayerState != VictimPlayerState && BlastWarsGameState)
 	{
-		AttackerPlayerState->AddToScore(1.f);
-		
-		if (BlastWarsGameState)
+		TArray<ABlasterPlayerState*> PlayersCurrentlyInTheLead;
+		for (auto LeadPlayer : BlastWarsGameState->TopScoringPlayers)
 		{
-			BlastWarsGameState->UpdateTopScore(AttackerPlayerState);
+			PlayersCurrentlyInTheLead.Add(LeadPlayer);
+		}
+
+		AttackerPlayerState->AddToScore(1.f);
+		BlastWarsGameState->UpdateTopScore(AttackerPlayerState);
+		if (BlastWarsGameState->TopScoringPlayers.Contains(AttackerPlayerState))
+		{
+			ABlasterCharacter* Leader = Cast<ABlasterCharacter>(AttackerPlayerState->GetPawn());
+			if (Leader)
+			{
+				Leader->MulticastGainedTheLead();
+			}
+		}
+
+		for (int32 i = 0; i < PlayersCurrentlyInTheLead.Num(); i++)
+		{
+			if (!BlastWarsGameState->TopScoringPlayers.Contains(PlayersCurrentlyInTheLead[i]))
+			{
+				ABlasterCharacter* Loser = Cast<ABlasterCharacter>(PlayersCurrentlyInTheLead[i]->GetPawn());
+				if (Loser)
+				{
+					Loser->MulticastLostTheLead();
+				}
+			}
 		}
 	}
 

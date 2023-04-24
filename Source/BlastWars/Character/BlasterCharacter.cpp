@@ -28,6 +28,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Components/BoxComponent.h"
 #include "BlastWars/BlasterComponents/LagCompensationComponent.h"
+#include "BlastWars/GameState/BlastWarsGameState.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -239,6 +240,12 @@ void ABlasterCharacter::PollInitialize()
 		{
 			BlasterPlayerState->AddToScore(0.f);
 			BlasterPlayerState->AddToDeaths(0.f);
+
+			ABlastWarsGameState* BlastWarsGameState = Cast<ABlastWarsGameState>(UGameplayStatics::GetGameState(this));
+			if (BlastWarsGameState && BlastWarsGameState->TopScoringPlayers.Contains(BlasterPlayerState))
+			{
+				MulticastGainedTheLead();
+			}
 		}
 	}
 }
@@ -881,6 +888,10 @@ void ABlasterCharacter::MulticastEliminated_Implementation(const FString& Attack
 	{
 		ShowSniperScopeWidget(false);
 	}
+	if (StarComponent)
+	{
+		StarComponent->DestroyComponent();
+	}
 	GetWorldTimerManager().SetTimer(EliminatedTimer, this, &ABlasterCharacter::EliminatedTimerFinished, EliminatedDelay);
 }
 
@@ -1016,4 +1027,26 @@ bool ABlasterCharacter::IsLocallyReloading()
 {
 	if (!Combat) return false;
 	return Combat->bLocallyReloading;
+}
+
+void ABlasterCharacter::MulticastGainedTheLead_Implementation()
+{
+	if (!StarSystem) return;
+	if (!StarComponent)
+	{
+		StarComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(StarSystem, GetCapsuleComponent(), FName(), GetActorLocation() + FVector(0.f, 0.f, 160.f), GetActorRotation(), EAttachLocation::KeepWorldPosition, false);
+
+	}
+	if (StarComponent)
+	{
+		StarComponent->Activate();
+	}
+}
+
+void ABlasterCharacter::MulticastLostTheLead_Implementation()
+{
+	if (StarComponent)
+	{
+		StarComponent->DestroyComponent();
+	}
 }

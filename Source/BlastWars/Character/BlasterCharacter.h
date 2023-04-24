@@ -69,6 +69,11 @@ public:
 	void ServerLeaveGame();
 	FOnLeftGame OnLeftGame;
 
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastGainedTheLead();
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastLostTheLead();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -214,6 +219,12 @@ private :
 	UPROPERTY(EditAnywhere)
 	class USoundCue* DeathSound;
 	bool bLeftGame = false;
+
+	// Leading Player
+	UPROPERTY(EditAnywhere)
+	UNiagaraSystem* StarSystem;
+	UPROPERTY()
+	class UNiagaraComponent* StarComponent;
 
 	// Dissolve
 

@@ -8,7 +8,6 @@
 #include "NiagaraFunctionLibrary.h"
 #include "Sound/SoundCue.h"
 #include "Particles/ParticleSystemComponent.h"
-#include "DrawDebugHelpers.h"
 #include "BlastWars/Types/WeaponTypes.h"
 #include "BlastWars/BlasterComponents/LagCompensationComponent.h"
 #include "BlastWars/PlayerController/BlasterPlayerController.h"
