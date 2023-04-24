@@ -11,6 +11,8 @@
 #include "InputActionValue.h"
 #include "BlasterCharacter.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftGame);
+
 class UInputAction;
 
 UCLASS()
@@ -40,10 +42,10 @@ public:
 
 	virtual void OnRep_ReplicatedMovement() override;
 
-	void Eliminated(class ABlasterPlayerController* AttackerController);
+	void Eliminated(class ABlasterPlayerController* AttackerController, bool bPlayerLeftGame);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastEliminated(const FString& AttackerName);
+	void MulticastEliminated(const FString& AttackerName, bool bPlayerLeftGame);
 
 	UPROPERTY(Replicated)
 	bool bDisableGameplay = false;
@@ -62,6 +64,10 @@ public:
 	TMap<FName, class UBoxComponent*> HitCollisionBoxes;
 
 	bool bFinishedSwapping = false;
+
+	UFUNCTION(Server, Reliable)
+	void ServerLeaveGame();
+	FOnLeftGame OnLeftGame;
 
 protected:
 	// Called when the game starts or when spawned
@@ -207,6 +213,7 @@ private :
 	class UNiagaraSystem* DeathParticles;
 	UPROPERTY(EditAnywhere)
 	class USoundCue* DeathSound;
+	bool bLeftGame = false;
 
 	// Dissolve
 

@@ -793,7 +793,7 @@ void ABlasterCharacter::DropOrDestroyWeapon(AWeapon* Weapon)
 	}
 }
 
-void ABlasterCharacter::Eliminated(ABlasterPlayerController* AttackController)
+void ABlasterCharacter::Eliminated(ABlasterPlayerController* AttackController, bool bPlayerLeftGame)
 {
 	if (Combat)
 	{
@@ -807,24 +807,26 @@ void ABlasterCharacter::Eliminated(ABlasterPlayerController* AttackController)
 		}
 	}
 	FString AttackerName = "";
-	ABlasterPlayerController* AttackerBlasterController = AttackController;
-	BlasterPlayerController = !BlasterPlayerController ? Cast<ABlasterPlayerController>(GetController()) : BlasterPlayerController;
-	if (AttackerBlasterController && AttackerBlasterController != BlasterPlayerController)
+	if (AttackController)
 	{
-		ABlasterPlayerState* AttackerPlayerState = Cast<ABlasterPlayerState>(AttackerBlasterController->PlayerState);
-		if (AttackerPlayerState)
+		ABlasterPlayerController* AttackerBlasterController = AttackController;
+		BlasterPlayerController = !BlasterPlayerController ? Cast<ABlasterPlayerController>(GetController()) : BlasterPlayerController;
+		if (AttackerBlasterController && AttackerBlasterController != BlasterPlayerController)
 		{
-			AttackerName = AttackerPlayerState->GetPlayerName();
+			ABlasterPlayerState* AttackerPlayerState = Cast<ABlasterPlayerState>(AttackerBlasterController->PlayerState);
+			if (AttackerPlayerState)
+			{
+				AttackerName = AttackerPlayerState->GetPlayerName();
+			}
 		}
 	}
-	MulticastEliminated(AttackerName);
-	GetWorldTimerManager().SetTimer(EliminatedTimer, this, &ABlasterCharacter::EliminatedTimerFinished, EliminatedDelay);
 	
+	MulticastEliminated(AttackerName, bPlayerLeftGame);
 }
 
-void ABlasterCharacter::MulticastEliminated_Implementation(const FString& AttackerName)
+void ABlasterCharacter::MulticastEliminated_Implementation(const FString& AttackerName, bool bPlayerLeftGame)
 {
-	
+	bLeftGame = bPlayerLeftGame;
 	if (BlasterPlayerController)
 	{
 		BlasterPlayerController->SetHUDWeaponAmmo(0);
@@ -879,12 +881,13 @@ void ABlasterCharacter::MulticastEliminated_Implementation(const FString& Attack
 	{
 		ShowSniperScopeWidget(false);
 	}
+	GetWorldTimerManager().SetTimer(EliminatedTimer, this, &ABlasterCharacter::EliminatedTimerFinished, EliminatedDelay);
 }
 
 void ABlasterCharacter::EliminatedTimerFinished()
 {
 	ABlastWarsGameMode* BlastWarsGameMode = GetWorld()->GetAuthGameMode<ABlastWarsGameMode>();
-	if (BlastWarsGameMode)
+	if (BlastWarsGameMode && !bLeftGame)
 	{
 		BlastWarsGameMode->RequestRespawn(this, Controller);
 		//BlasterPlayerController = !BlasterPlayerController ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
@@ -892,6 +895,20 @@ void ABlasterCharacter::EliminatedTimerFinished()
 		{
 			BlasterPlayerController->HideEliminatedText();
 		}
+	}
+	if (bLeftGame && IsLocallyControlled())
+	{
+		OnLeftGame.Broadcast();
+	}
+}
+
+void ABlasterCharacter::ServerLeaveGame_Implementation()
+{
+	ABlastWarsGameMode* BlastWarsGameMode = GetWorld()->GetAuthGameMode<ABlastWarsGameMode>();
+	BlasterPlayerState = !BlasterPlayerState ? GetPlayerState<ABlasterPlayerState>() : BlasterPlayerState;
+	if (BlastWarsGameMode && BlasterPlayerState)
+	{
+		BlastWarsGameMode->PlayerLeftGame(BlasterPlayerState);
 	}
 }
 
@@ -1000,6 +1017,3 @@ bool ABlasterCharacter::IsLocallyReloading()
 	if (!Combat) return false;
 	return Combat->bLocallyReloading;
 }
-
-
-

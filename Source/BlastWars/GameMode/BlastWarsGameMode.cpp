@@ -93,7 +93,7 @@ void ABlastWarsGameMode::PlayerEliminated(ABlasterCharacter* EliminatedCharacter
 	
 	if (EliminatedCharacter)
 	{
-		EliminatedCharacter->Eliminated(AttackerController);
+		EliminatedCharacter->Eliminated(AttackerController, false);
 	}
 	
 }
@@ -114,5 +114,20 @@ void ABlastWarsGameMode::RequestRespawn(ACharacter* EliminatedCharacter, AContro
 		UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), PlayerStarts);
 		int32 Selection = FMath::RandRange(0, PlayerStarts.Num() - 1);
 		RestartPlayerAtPlayerStart(EliminatedController, PlayerStarts[Selection]);
+	}
+}
+
+void ABlastWarsGameMode::PlayerLeftGame(ABlasterPlayerState* PlayerLeaving)
+{
+	if (!PlayerLeaving) return;
+	ABlastWarsGameState* BlastWarsGameState = GetGameState<ABlastWarsGameState>();
+	if (BlastWarsGameState && BlastWarsGameState->TopScoringPlayers.Contains(PlayerLeaving))
+	{
+		BlastWarsGameState->TopScoringPlayers.Remove(PlayerLeaving);
+	}
+	ABlasterCharacter* CharacterLeaving = Cast<ABlasterCharacter>(PlayerLeaving->GetPawn());
+	if (CharacterLeaving)
+	{
+		CharacterLeaving->Eliminated(nullptr, true);
 	}
 }
