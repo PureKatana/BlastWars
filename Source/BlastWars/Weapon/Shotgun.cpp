@@ -83,7 +83,8 @@ void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 		{
 			if (HitPair.Key && InstigatorController)
 			{
-				if (HasAuthority() && !bUseServerSideRewind)
+				bool bCauseAuthorityDamage = !bUseServerSideRewind || OwnerPawn->IsLocallyControlled();
+				if (HasAuthority() && bCauseAuthorityDamage)
 				{
 					// Multiply Damage by the number of times hit (value) to the character hit (key)
 					UGameplayStatics::ApplyDamage(HitPair.Key, Damage * HitPair.Value, InstigatorController, this, UDamageType::StaticClass());
