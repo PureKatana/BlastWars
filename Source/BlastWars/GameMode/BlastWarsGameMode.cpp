@@ -117,6 +117,15 @@ void ABlastWarsGameMode::PlayerEliminated(ABlasterCharacter* EliminatedCharacter
 	{
 		EliminatedCharacter->Eliminated(AttackerController, false);
 	}
+
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		ABlasterPlayerController* BlasterPlayer = Cast<ABlasterPlayerController>(*It);
+		if (BlasterPlayer && AttackerPlayerState && VictimPlayerState)
+		{
+			BlasterPlayer->BroadcastElimination(AttackerPlayerState, VictimPlayerState);
+		}
+	}
 	
 }
 

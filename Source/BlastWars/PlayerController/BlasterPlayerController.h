@@ -48,6 +48,8 @@ public:
 	UPROPERTY(EditAnywhere, Category = Input)
 	class UInputAction* QuitAction;
 
+	void BroadcastElimination(APlayerState* Attacker, APlayerState* Victim);
+
 protected:
 
 	virtual void BeginPlay() override;
@@ -83,6 +85,9 @@ protected:
 	void CheckPing(float DeltaTime);
 
 	void ShowReturnToMainMenu();
+
+	UFUNCTION(Client, Reliable)
+	void ClientEliminationAnnouncement(APlayerState* Attacker, APlayerState* Victim);
 
 private:
 
