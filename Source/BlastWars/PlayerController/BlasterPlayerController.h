@@ -40,15 +40,18 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	void HandleMatchHasStarted();
 	void HandleCooldown();
-	virtual void SetupInputComponent() override;
 
 	float SingleTripTime = 0.f;
 
 	FHighPingDelegate HighPingDelegate;
 
+	UPROPERTY(EditAnywhere, Category = Input)
+	class UInputAction* QuitAction;
+
 protected:
 
 	virtual void BeginPlay() override;
+	virtual void SetupInputComponent() override;
 	void SetHUDTime();
 	void PollInitialize();
 	virtual void Tick(float DeltaTime) override;
@@ -78,6 +81,8 @@ protected:
 	void HighPingWarning();
 	void StopHighPingWarning();
 	void CheckPing(float DeltaTime);
+
+	void ShowReturnToMainMenu();
 
 private:
 
@@ -128,4 +133,10 @@ private:
 	float PingAnimationRunningTime = 0.f;
 	UFUNCTION(Server, Reliable)
 	void ServerReportPingStatus(bool bHighPing);
+
+	UPROPERTY(EditAnywhere, Category = HUD)
+	TSubclassOf<class UUserWidget> ReturnToMainMenuWidget;
+	UPROPERTY()
+	class UReturnToMainMenu* ReturnToMainMenu;
+	bool bReturnToMainMenuOpen = false;
 };
