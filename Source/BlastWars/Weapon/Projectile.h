@@ -25,7 +25,12 @@ public:
 	UPROPERTY(EditAnywhere)
 	float InitialSpeed = 15000.f;
 
+	// Grenades and Rockets
+	UPROPERTY(EditAnywhere)
 	float Damage = 20.f;
+	// Bullets
+	UPROPERTY(EditAnywhere)
+	float HeadshotDamage = 40.f;
 
 protected:
 	// Called when the game starts or when spawned
