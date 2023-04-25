@@ -5,6 +5,12 @@
 #include "BlastWars/GameState/BlastWarsGameState.h"
 #include "BlastWars/PlayerState/BlasterPlayerState.h"
 #include "Kismet/GameplayStatics.h"
+#include "BlastWars/PlayerController/BlasterPlayerController.h"
+
+ATeamGameMode::ATeamGameMode()
+{
+	bTeamMatch = true;
+}
 
 void ATeamGameMode::PostLogin(APlayerController* NewPlayer)
 {
@@ -43,6 +49,36 @@ void ATeamGameMode::Logout(AController* Exiting)
 		if (BlastWarsGameState->BlueTeam.Contains(BPState))
 		{
 			BlastWarsGameState->BlueTeam.Remove(BPState);
+		}
+	}
+}
+
+float ATeamGameMode::CalculateDamage(AController* Attacker, AController* Victim, float BaseDamage)
+{
+	ABlasterPlayerState* AttackerState = Attacker->GetPlayerState<ABlasterPlayerState>();
+	ABlasterPlayerState* VictimState = Victim->GetPlayerState<ABlasterPlayerState>();
+
+	if (!AttackerState || !VictimState) return BaseDamage;
+	if (VictimState == AttackerState) return BaseDamage;
+	if (AttackerState->GetTeam() == VictimState->GetTeam()) return 0.f;
+	return BaseDamage;
+}
+
+void ATeamGameMode::PlayerEliminated(ABlasterCharacter* EliminatedCharacter, ABlasterPlayerController* VictimController, ABlasterPlayerController* AttackerController)
+{
+	Super::PlayerEliminated(EliminatedCharacter, VictimController, AttackerController);
+
+	ABlastWarsGameState* BlastWarsGameState = Cast<ABlastWarsGameState>(UGameplayStatics::GetGameState(this));
+	ABlasterPlayerState* AttackerPlayerState = AttackerController ? Cast<ABlasterPlayerState>(AttackerController->PlayerState) : nullptr;
+	if (BlastWarsGameState && AttackerPlayerState)
+	{
+		if (AttackerPlayerState->GetTeam() == ETeam::ET_Blue)
+		{
+			BlastWarsGameState->BlueTeamScores();
+		}
+		if (AttackerPlayerState->GetTeam() == ETeam::ET_Red)
+		{
+			BlastWarsGameState->RedTeamScores();
 		}
 	}
 }

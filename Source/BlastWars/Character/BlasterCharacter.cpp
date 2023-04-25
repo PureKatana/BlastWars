@@ -185,7 +185,7 @@ void ABlasterCharacter::BeginPlay()
 void ABlasterCharacter::Destroyed()
 {
 	Super::Destroyed();
-	ABlastWarsGameMode* BlastWarsGameMode = Cast<ABlastWarsGameMode>(UGameplayStatics::GetGameMode(this));
+	BlastWarsGameMode = !BlastWarsGameMode ? GetWorld()->GetAuthGameMode<ABlastWarsGameMode>() : BlastWarsGameMode;
 	bool bMatchNotInProgress = BlastWarsGameMode && BlastWarsGameMode->GetMatchState() != MatchState::InProgress;
 	if (Combat && Combat->EquippedWeapon && bMatchNotInProgress)
 	{
@@ -240,6 +240,7 @@ void ABlasterCharacter::PollInitialize()
 		{
 			BlasterPlayerState->AddToScore(0.f);
 			BlasterPlayerState->AddToDeaths(0.f);
+			SetTeamColor(BlasterPlayerState->GetTeam());
 
 			ABlastWarsGameState* BlastWarsGameState = Cast<ABlastWarsGameState>(UGameplayStatics::GetGameState(this));
 			if (BlastWarsGameState && BlastWarsGameState->TopScoringPlayers.Contains(BlasterPlayerState))
@@ -323,7 +324,7 @@ void ABlasterCharacter::UpdateEliminatedText()
 
 void ABlasterCharacter::SpawnDefaultWeapon()
 {
-	ABlastWarsGameMode* BlastWarsGameMode = Cast<ABlastWarsGameMode>(UGameplayStatics::GetGameMode(this));
+	BlastWarsGameMode = !BlastWarsGameMode ? GetWorld()->GetAuthGameMode<ABlastWarsGameMode>() : BlastWarsGameMode;
 	UWorld* World = GetWorld();
 	if (BlastWarsGameMode && World && !bEliminated && DefaultWeaponClass)
 	{
@@ -729,7 +730,10 @@ void ABlasterCharacter::FireReleased()
 
 void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
 {
-	if (bEliminated) return;
+	BlastWarsGameMode = !BlastWarsGameMode ? GetWorld()->GetAuthGameMode<ABlastWarsGameMode>() : BlastWarsGameMode;
+	if (bEliminated || !BlastWarsGameMode) return;
+
+	Damage = BlastWarsGameMode->CalculateDamage(InstigatorController, Controller, Damage);
 
 	float DamageToHealth = Damage;
 	if (Shield > 0.f)
@@ -749,12 +753,13 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const 
 	Health = FMath::Clamp(Health - DamageToHealth, 0.f, MaxHealth);
 	UpdateHUDHealth();
 	UpdateHUDShield();
-	PlayHitReactMontage();
+	if (DamageToHealth > 0.f)
+	{
+		PlayHitReactMontage();
+	}
 
 	if (Health == 0.f)
 	{
-		ABlastWarsGameMode* BlastWarsGameMode = GetWorld()->GetAuthGameMode<ABlastWarsGameMode>();
-
 		if (BlastWarsGameMode)
 		{
 			BlasterPlayerController = !BlasterPlayerController ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
@@ -871,6 +876,7 @@ void ABlasterCharacter::MulticastEliminated_Implementation(const FString& Attack
 	//Disable Collision
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	AttachedGrenade->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	// Death Effect
 	if (DeathParticles)
@@ -897,7 +903,7 @@ void ABlasterCharacter::MulticastEliminated_Implementation(const FString& Attack
 
 void ABlasterCharacter::EliminatedTimerFinished()
 {
-	ABlastWarsGameMode* BlastWarsGameMode = GetWorld()->GetAuthGameMode<ABlastWarsGameMode>();
+	BlastWarsGameMode = !BlastWarsGameMode ? GetWorld()->GetAuthGameMode<ABlastWarsGameMode>() : BlastWarsGameMode;
 	if (BlastWarsGameMode && !bLeftGame)
 	{
 		BlastWarsGameMode->RequestRespawn(this, Controller);
@@ -915,7 +921,7 @@ void ABlasterCharacter::EliminatedTimerFinished()
 
 void ABlasterCharacter::ServerLeaveGame_Implementation()
 {
-	ABlastWarsGameMode* BlastWarsGameMode = GetWorld()->GetAuthGameMode<ABlastWarsGameMode>();
+	BlastWarsGameMode = !BlastWarsGameMode ? GetWorld()->GetAuthGameMode<ABlastWarsGameMode>() : BlastWarsGameMode;
 	BlasterPlayerState = !BlasterPlayerState ? GetPlayerState<ABlasterPlayerState>() : BlasterPlayerState;
 	if (BlastWarsGameMode && BlasterPlayerState)
 	{
@@ -967,6 +973,10 @@ void ABlasterCharacter::HideCamera()
 		{
 			Combat->EquippedWeapon->GetWeaponMesh()->bOwnerNoSee = true;
 		}
+		if (Combat && Combat->SecondaryWeapon && Combat->SecondaryWeapon->GetWeaponMesh())
+		{
+			Combat->SecondaryWeapon->GetWeaponMesh()->bOwnerNoSee = true;
+		}
 	}
 	else
 	{
@@ -974,6 +984,10 @@ void ABlasterCharacter::HideCamera()
 		if (IsWeaponEquipped() && Combat->EquippedWeapon->GetWeaponMesh())
 		{
 			Combat->EquippedWeapon->GetWeaponMesh()->bOwnerNoSee = false;
+		}
+		if (Combat && Combat->SecondaryWeapon && Combat->SecondaryWeapon->GetWeaponMesh())
+		{
+			Combat->SecondaryWeapon->GetWeaponMesh()->bOwnerNoSee = false;
 		}
 	}
 }
@@ -1048,5 +1062,28 @@ void ABlasterCharacter::MulticastLostTheLead_Implementation()
 	if (StarComponent)
 	{
 		StarComponent->DestroyComponent();
+	}
+}
+
+void ABlasterCharacter::SetTeamColor(ETeam Team)
+{
+	if (!GetMesh() || !OriginalMaterial) return;
+	switch (Team)
+	{
+	case ETeam::ET_NoTeam:
+		GetMesh()->SetMaterial(0, OriginalMaterial);
+		DissolveMaterialInstance = OriginalDissolveMatInst;
+		DeathParticles = DeathOriginalParticles;
+		break;
+	case ETeam::ET_Blue:
+		GetMesh()->SetMaterial(0, BlueMaterial);
+		DissolveMaterialInstance = BlueDissolveMatInst;
+		DeathParticles = DeathBlueParticles;
+		break;
+	case ETeam::ET_Red:
+		GetMesh()->SetMaterial(0, RedMaterial);
+		DissolveMaterialInstance = RedDissolveMatInst;
+		DeathParticles = DeathRedParticles;
+		break;
 	}
 }

@@ -9,6 +9,7 @@
 #include "BlastWars/Interfaces/InteractWithCrosshairsInterface.h"
 #include "Components/TimelineComponent.h"
 #include "InputActionValue.h"
+#include "BlastWars/Types/Team.h"
 #include "BlasterCharacter.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftGame);
@@ -73,6 +74,8 @@ public:
 	void MulticastGainedTheLead();
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastLostTheLead();
+
+	void SetTeamColor(ETeam Team);
 
 protected:
 	// Called when the game starts or when spawned
@@ -214,8 +217,14 @@ private :
 	UPROPERTY(EditDefaultsOnly)
 	float EliminatedDelay = 3.f;
 	void EliminatedTimerFinished();
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere)
 	class UNiagaraSystem* DeathParticles;
+	UPROPERTY(EditAnywhere)
+	UNiagaraSystem* DeathBlueParticles;
+	UPROPERTY(EditAnywhere)
+	UNiagaraSystem* DeathRedParticles;
+	UPROPERTY(EditAnywhere)
+	UNiagaraSystem* DeathOriginalParticles;
 	UPROPERTY(EditAnywhere)
 	class USoundCue* DeathSound;
 	bool bLeftGame = false;
@@ -240,8 +249,23 @@ private :
 	// Dynamic Instance that we can change at runtime
 	UMaterialInstanceDynamic* DynamicDissolveMaterialInstance;
 	// Material Instance set on the blueprint, used with the dynamic material instance
-	UPROPERTY(EditAnywhere, Category = Elimination)
+	UPROPERTY(VisibleAnywhere, Category = Elimination)
 	UMaterialInstance* DissolveMaterialInstance;
+	UPROPERTY(EditAnywhere, Category = Elimination)
+	UMaterialInstance* OriginalMaterial;
+	UPROPERTY(EditAnywhere, Category = Elimination)
+	UMaterialInstance* OriginalDissolveMatInst;
+
+	// Team colors
+	UPROPERTY(EditAnywhere, Category = Elimination)
+	UMaterialInstance* RedDissolveMatInst;
+	UPROPERTY(EditAnywhere, Category = Elimination)
+	UMaterialInstance* RedMaterial;
+
+	UPROPERTY(EditAnywhere, Category = Elimination)
+	UMaterialInstance* BlueDissolveMatInst;
+	UPROPERTY(EditAnywhere, Category = Elimination)
+	UMaterialInstance* BlueMaterial;
 
 	UPROPERTY()
 	class ABlasterPlayerState* BlasterPlayerState;
@@ -297,6 +321,9 @@ private :
 	UBoxComponent* foot_l;
 	UPROPERTY(EditAnywhere)
 	UBoxComponent* foot_r;
+
+	UPROPERTY()
+	class ABlastWarsGameMode* BlastWarsGameMode;
 
 public:	
 	void SetOverlappingWeapon(AWeapon* Weapon);

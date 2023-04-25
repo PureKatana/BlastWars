@@ -30,15 +30,19 @@ public:
 	void SetHUDAnnouncementCountdown(float CountdownTime);
 	void SetHUDGrenades(int32 Grenades);
 	void HideEliminatedText();
+	void HideTeamScores();
+	void InitializeTeamScores();
+	void SetHUDRedTeamScore(int32 RedScore);
+	void SetHUDBlueTeamScore(int32 BlueScore);
 
 	virtual void OnPossess(APawn* InPawn) override;
 	// Synced with server world clock
 	virtual float GetServerTime();
 	// Sync with server clock as soon as possible
 	virtual void ReceivedPlayer() override;
-	void OnMatchStateSet(FName State);
+	void OnMatchStateSet(FName State, bool bTeamMatch = false);
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	void HandleMatchHasStarted();
+	void HandleMatchHasStarted(bool bTeamMatch = false);
 	void HandleCooldown();
 
 	float SingleTripTime = 0.f;
@@ -88,6 +92,14 @@ protected:
 
 	UFUNCTION(Client, Reliable)
 	void ClientEliminationAnnouncement(APlayerState* Attacker, APlayerState* Victim);
+
+	UPROPERTY(ReplicatedUsing = OnRep_ShowTeamScores)
+	bool bShowTeamScores = false;
+	UFUNCTION()
+	void OnRep_ShowTeamScores();
+
+	FString GetInfoText(const TArray<class ABlasterPlayerState*>& Players);
+	FString GetTeamsInfoText(class ABlastWarsGameState* BlastWarsGameState);
 
 private:
 
