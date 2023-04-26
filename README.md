@@ -19,7 +19,7 @@ Blast Wars is a multiplayer third person shooting game. Use different weapons an
 
 
 
-https://user-images.githubusercontent.com/97700549/233455770-2600c9f8-9f71-4a1a-be73-74a2ed41b864.mp4
+https://user-images.githubusercontent.com/97700549/234442927-4b59c8d3-a56a-4390-9475-a37c4b511948.mp4
 
 
 
