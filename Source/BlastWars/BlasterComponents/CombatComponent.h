@@ -204,9 +204,6 @@ private:
 	void OnRep_Grenades();
 	void UpdateHUDGrenades();
 
-	UPROPERTY(Replicated)
-	bool bHoldingFlag = false;
-
 	UFUNCTION()
 	void OnRep_EquipFlag();
 

@@ -63,7 +63,6 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME_CONDITION(UCombatComponent, CarriedAmmo, COND_OwnerOnly);
 	DOREPLIFETIME(UCombatComponent, CombatState);
 	DOREPLIFETIME(UCombatComponent, Grenades);
-	DOREPLIFETIME(UCombatComponent, bHoldingFlag);
 	DOREPLIFETIME(UCombatComponent, Flag);
 }
 
@@ -641,7 +640,7 @@ void UCombatComponent::OnRep_SecondaryWeapon()
 
 void UCombatComponent::OnRep_EquipFlag()
 {
-	if (bHoldingFlag && Character && Flag)
+	if (Character && Flag)
 	{
 		Flag->SetWeaponState(EWeaponState::EWS_Equipped);
 		AttachActorToSocket(Flag, FName("FlagSocket"));
@@ -725,7 +724,6 @@ void UCombatComponent::EquipSecondaryWeapon(AWeapon* WeaponToEquip)
 void UCombatComponent::EquipFlag(AWeapon* FlagToEquip)
 {
 	if (!FlagToEquip) return;
-	bHoldingFlag = true;
 	Flag = FlagToEquip;
 	Flag->SetWeaponState(EWeaponState::EWS_Equipped);
 	AttachActorToSocket(Flag, FName("FlagSocket"));

@@ -29,6 +29,7 @@
 #include "Components/BoxComponent.h"
 #include "BlastWars/BlasterComponents/LagCompensationComponent.h"
 #include "BlastWars/GameState/BlastWarsGameState.h"
+#include "BlastWars/PlayerStart/TeamPlayerStart.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -241,6 +242,7 @@ void ABlasterCharacter::PollInitialize()
 			BlasterPlayerState->AddToScore(0.f);
 			BlasterPlayerState->AddToDeaths(0.f);
 			SetTeamColor(BlasterPlayerState->GetTeam());
+			SetSpawnPoint();
 
 			ABlastWarsGameState* BlastWarsGameState = Cast<ABlastWarsGameState>(UGameplayStatics::GetGameState(this));
 			if (BlastWarsGameState && BlastWarsGameState->TopScoringPlayers.Contains(BlasterPlayerState))
@@ -248,6 +250,30 @@ void ABlasterCharacter::PollInitialize()
 				MulticastGainedTheLead();
 			}
 		}
+	}
+}
+
+void ABlasterCharacter::SetSpawnPoint()
+{
+	if (HasAuthority() && BlasterPlayerState->GetTeam() != ETeam::ET_NoTeam)
+	{
+		TArray<AActor*> PlayerStarts;
+		UGameplayStatics::GetAllActorsOfClass(this, ATeamPlayerStart::StaticClass(), PlayerStarts);
+		TArray<ATeamPlayerStart*> TeamPlayerStarts;
+		for (auto Start : PlayerStarts)
+		{
+			ATeamPlayerStart* TeamStart = Cast<ATeamPlayerStart>(Start);
+			if (TeamStart && TeamStart->Team == BlasterPlayerState->GetTeam())
+			{
+				TeamPlayerStarts.Add(TeamStart);
+			}
+		}
+		if (!TeamPlayerStarts.IsEmpty())
+		{
+			ATeamPlayerStart* ChosenPlayerStart = TeamPlayerStarts[FMath::RandRange(0, TeamPlayerStarts.Num() - 1)];
+			SetActorLocationAndRotation(ChosenPlayerStart->GetActorLocation(), ChosenPlayerStart->GetActorRotation());
+		}
+
 	}
 }
 
@@ -1047,12 +1073,6 @@ bool ABlasterCharacter::IsLocallyReloading()
 	return Combat->bLocallyReloading;
 }
 
-bool ABlasterCharacter::IsHoldingFlag() const
-{
-	if (!Combat) return false;
-	return Combat->bHoldingFlag;
-}
-
 void ABlasterCharacter::MulticastGainedTheLead_Implementation()
 {
 	if (!StarSystem) return;
@@ -1105,3 +1125,4 @@ ETeam ABlasterCharacter::GetTeam()
 	return BlasterPlayerState->GetTeam();
 	
 }
+
