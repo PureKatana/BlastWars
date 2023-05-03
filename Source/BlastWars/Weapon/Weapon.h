@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "BlastWars/Types/WeaponTypes.h"
+#include "BlastWars/Types/Team.h"
 #include "Weapon.generated.h"
 
 UENUM(BlueprintType)
@@ -152,6 +153,8 @@ private:
 	int32 Sequence = 0;
 	UPROPERTY(EditAnywhere)
 	EWeaponType WeaponType;
+	UPROPERTY(EditAnywhere)
+	ETeam Team;
 	
 public:	
 	void SetWeaponState(EWeaponState State);

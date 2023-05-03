@@ -1097,3 +1097,11 @@ void ABlasterCharacter::SetTeamColor(ETeam Team)
 		break;
 	}
 }
+
+ETeam ABlasterCharacter::GetTeam()
+{
+	BlasterPlayerState = !BlasterPlayerState ? GetPlayerState<ABlasterPlayerState>() : BlasterPlayerState;
+	if (!BlasterPlayerState) return ETeam::ET_NoTeam;
+	return BlasterPlayerState->GetTeam();
+	
+}
