@@ -63,6 +63,8 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME_CONDITION(UCombatComponent, CarriedAmmo, COND_OwnerOnly);
 	DOREPLIFETIME(UCombatComponent, CombatState);
 	DOREPLIFETIME(UCombatComponent, Grenades);
+	DOREPLIFETIME(UCombatComponent, bHoldingFlag);
+	DOREPLIFETIME(UCombatComponent, Flag);
 }
 
 // Called every frame
@@ -637,19 +639,35 @@ void UCombatComponent::OnRep_SecondaryWeapon()
 	}
 }
 
+void UCombatComponent::OnRep_EquipFlag()
+{
+	if (bHoldingFlag && Character && Flag)
+	{
+		Flag->SetWeaponState(EWeaponState::EWS_Equipped);
+		AttachActorToSocket(Flag, FName("FlagSocket"));
+	}
+}
+
 void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 {
 	if (!Character || !WeaponToEquip) return;
 	if (CombatState != ECombatState::ECS_Unoccupied) return;
-	if (EquippedWeapon && !SecondaryWeapon)
+
+	if (WeaponToEquip->GetWeaponType() == EWeaponType::EWT_Flag)
 	{
-		EquipSecondaryWeapon(WeaponToEquip);
+		EquipFlag(WeaponToEquip);
 	}
 	else
 	{
-		EquipPrimaryWeapon(WeaponToEquip);
+		if (EquippedWeapon && !SecondaryWeapon)
+		{
+			EquipSecondaryWeapon(WeaponToEquip);
+		}
+		else
+		{
+			EquipPrimaryWeapon(WeaponToEquip);
+		}
 	}
-	
 	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 	Character->bUseControllerRotationYaw = true;
 }
@@ -702,6 +720,16 @@ void UCombatComponent::EquipSecondaryWeapon(AWeapon* WeaponToEquip)
 		AttachActorToSocket(WeaponToEquip, FName("BackpackSocket"));
 	}
 	SecondaryWeapon->SetOwner(Character);
+}
+
+void UCombatComponent::EquipFlag(AWeapon* FlagToEquip)
+{
+	if (!FlagToEquip) return;
+	bHoldingFlag = true;
+	Flag = FlagToEquip;
+	Flag->SetWeaponState(EWeaponState::EWS_Equipped);
+	AttachActorToSocket(Flag, FName("FlagSocket"));
+	Flag->SetOwner(Character);
 }
 
 void UCombatComponent::DropEquippedWeapon()

@@ -817,6 +817,10 @@ void ABlasterCharacter::Eliminated(ABlasterPlayerController* AttackController, b
 		{
 			DropOrDestroyWeapon(Combat->SecondaryWeapon);
 		}
+		if (Combat->Flag)
+		{
+			DropOrDestroyWeapon(Combat->Flag);
+		}
 	}
 	FString AttackerName = "";
 	if (AttackController)
@@ -1041,6 +1045,12 @@ bool ABlasterCharacter::IsLocallyReloading()
 {
 	if (!Combat) return false;
 	return Combat->bLocallyReloading;
+}
+
+bool ABlasterCharacter::IsHoldingFlag() const
+{
+	if (!Combat) return false;
+	return Combat->bHoldingFlag;
 }
 
 void ABlasterCharacter::MulticastGainedTheLead_Implementation()

@@ -57,7 +57,7 @@ protected:
 	void SetAiming(bool bIsAiming);
 
 	UFUNCTION(Server, Reliable)
-		void ServerSetAiming(bool bIsAiming); 
+	void ServerSetAiming(bool bIsAiming); 
 
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
@@ -102,6 +102,7 @@ protected:
 
 	void EquipPrimaryWeapon(AWeapon* WeaponToEquip);
 	void EquipSecondaryWeapon(AWeapon* WeaponToEquip);
+	void EquipFlag(AWeapon* FlagToEquip);
 
 private:
 	UPROPERTY()
@@ -114,6 +115,8 @@ private:
     AWeapon* EquippedWeapon;
 	UPROPERTY(ReplicatedUsing = OnRep_SecondaryWeapon)
 	AWeapon* SecondaryWeapon;
+	UPROPERTY(ReplicatedUsing = OnRep_EquipFlag)
+	AWeapon* Flag;
 	UPROPERTY(ReplicatedUsing = OnRep_Aiming)
 	bool bAiming = false;
 	bool bAimPressed = false;
@@ -200,6 +203,12 @@ private:
 	UFUNCTION()
 	void OnRep_Grenades();
 	void UpdateHUDGrenades();
+
+	UPROPERTY(Replicated)
+	bool bHoldingFlag = false;
+
+	UFUNCTION()
+	void OnRep_EquipFlag();
 
 public:	
 	
