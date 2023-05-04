@@ -1,4 +1,4 @@
-<h1>Blast Wars (Work in Progress)</h1>
+<h1>Blast Wars</h1>
 
 <h2>Description</h2>
 Blast Wars is a multiplayer third person shooting game. Use different weapons and power ups to kill other players in different mini game modes such as Free For All, Team Battle and Capture the Flag. This is a small project purely using C++.
