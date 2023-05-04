@@ -13,6 +13,18 @@ Blast Wars is a multiplayer third person shooting game. Use different weapons an
 
 - <b>Unreal Engine 5</b>
 
+<h2>Features and mechanics that I worked on : </h2>
+
+- <b>Simple Multiplayer Plugin using Steam Sessions</b>
+
+- <b>Different weapon types (Pistol, Assault Rifle, Submachine Gun, Sniper Rifle, Rocket Launcher, Grenade Launcher, Shotgun)</b>
+
+- <b>Different power ups (Heal, Shield, Speed boost, Jump boost)</b>
+
+- <b>Lag Compensation system</b>
+
+- <b>Different Game Modes (Free for all, Team Deathmatch, Capture The Flag)</b>
+
 <h2>Gameplay</h2>
 
 
